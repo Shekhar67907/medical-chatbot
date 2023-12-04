@@ -8,12 +8,12 @@ import requests
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
-API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-tiny.en"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 
 
-def recognize_speech(audio_file):
-    with open(audio_file, "rb") as f:
+def recognize_speech(audio_file_path):
+    with open(audio_file_path, "rb") as f:
         data = f.read()
 
     response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
@@ -41,11 +41,12 @@ def generate_answer(audio):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    with open("audio.wav", "wb") as wav_file:
-     wav_file.write(audio.raw_data)
+    audio_file_path = "audio.wav"
+    with open(audio_file_path, "wb") as wav_file:
+        wav_file.write(audio.raw_data)
 
     # Voice recognition model
-     text = recognize_speech("./audio.wav")
+    text = recognize_speech(audio_file_path)
 
     # Disease Prediction Model
     diagnostic = diagnostic_medic(text)
