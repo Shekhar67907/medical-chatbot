@@ -6,3 +6,4 @@ sentencepiece
 soundfile
 streamlit-audiorecorder
 ffmpeg-python
+google-cloud-speech==2.9.0
