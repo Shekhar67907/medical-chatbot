@@ -1,78 +1,148 @@
 import streamlit as st
-from audiorecorder import audiorecorder  # Assuming you have a library for audio recording
-
+from streamlit_chat import message as st_message
+from audiorecorder import audiorecorder
 import time
 import json
 import requests
 
 
-token_hugging_face = "Your token access"
+token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"} #TOKEN HUGGING FACE
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-tiny.en"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 
 
-
 def recognize_speech(audio_file):
+
     with open(audio_file, "rb") as f:
+
         data = f.read()
 
-    retries = 3
-    for _ in range(retries):
+    time.sleep(1)
+
+    while True:
+            
         try:
-            response = requests.request("POST", API_URL_RECOGNITION, headers=headers, data=data, timeout=10)
-            response.raise_for_status()
+
+            response = requests.request("POST", API_URL_RECOGNITION, headers=headers, data=data)
+
             output = json.loads(response.content.decode("utf-8"))
+
             final_output = output['text']
-            return final_output
-        except (KeyError, requests.RequestException) as e:
-            print(f"Error in recognize_speech: {e}")
-            time.sleep(1)
 
-    return "Failed to recognize speech"
+            break
 
-# Disease prediction model
+        except KeyError:
+
+            continue
+
+    return final_output
+
+
 def diagnostic_medic(voice_text):
+
     synthomps = {"inputs": voice_text}
+
     data = json.dumps(synthomps)
 
-    retries = 3
-    for _ in range(retries):
+      
+
+    time.sleep(1)
+
+    while True:
+
         try:
-            response = requests.request("POST", API_URL_DIAGNOSTIC, headers=headers, data=data, timeout=10)
-            response.raise_for_status()
+
+            response = requests.request("POST", API_URL_DIAGNOSTIC, headers=headers, data=data)  
+
             output = json.loads(response.content.decode("utf-8"))
+
             final_output = output[0][0]['label']
-            return final_output
-        except (KeyError, requests.RequestException) as e:
-            print(f"Error in diagnostic_medic: {e}")
-            time.sleep(1)
 
-    return "Failed to diagnose"
+            break
 
-# Paste the recognize_speech and diagnostic_medic functions here
+        except KeyError:
 
-# Streamlit app
-def main():
+            continue
+
+    return final_output
+
+
+
+def generate_answer(audio):
+
+
+
+    with st.spinner("Consultation in progress..."):
+
+        # To save audio to a file:
+        wav_file = open("audio.wav", "wb")
+
+        wav_file.write(audio.tobytes())
+                
+        # Voice recognition model
+        
+        text = recognize_speech("./audio.wav")
+
+
+        #Disease Prediction Model
+
+        diagnostic = diagnostic_medic(text)
+ 
+
+        #Save conversation
+        st.session_state.history.append({"message": text, "is_user": True})
+        st.session_state.history.append({"message": f" Your disease would be {diagnostic}", "is_user": False})
+
+
+        st.success("Medical consultation done") 
+
+           
+
+
+
+if __name__ == "__main__":
+    
+
+    # remove the hamburger in the upper right hand corner and the Made with Streamlit footer
+    hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+        </style>
+        """
+    st.markdown(hide_menu_style, unsafe_allow_html=True)
+
+        
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.write(' ')
+
+        
+    with col2:
+        st.image("./logo_.png", width = 200)
+
+        
+    with col3:
+        st.write(' ')
+
+    
+    if "history" not in st.session_state:
+
+        st.session_state.history = []
+
     st.title("Medical Diagnostic Assistant")
 
-    # User interface for recording audio
+    
+    #Show Input
     audio = audiorecorder("Start recording", "Recording in progress...")
 
     if len(audio) > 0:
-        st.success("Recording complete!")
 
-        # Voice recognition and disease prediction
-        st.subheader("Analyzing... Please wait.")
-        with st.spinner("Analyzing audio..."):
-            text_result = recognize_speech(audio)
-            disease_result = diagnostic_medic(text_result)
+        generate_answer(audio)
 
-        # Display results
-        st.subheader("Results:")
-        st.write(f"Recognized Symptomps: {text_result}")
-        st.write(f"Predicted Disease: {disease_result}")
+        for i, chat in enumerate(st.session_state.history): #Show historical consultation
 
-if __name__ == "__main__":
-    main()
+            st_message(**chat, key =str(i))
