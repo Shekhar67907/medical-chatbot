@@ -42,7 +42,7 @@ def generate_answer(audio):
 
     # To save audio to a file:
     with open("audio.wav", "wb") as wav_file:
-        wav_file.write(audio.raw_data)
+     wav_file.write(audio.raw_data)
 
     # Voice recognition model
      text = recognize_speech("./audio.wav")
