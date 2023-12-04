@@ -39,23 +39,28 @@ def diagnostic_medic(voice_text):
     return final_output
 
 
-def generate_answer(audio):
+def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    audio.export("audio.wav", format="wav")
+    audio_recording.export("audio.wav", format="wav")
 
     # Voice recognition model
+    st.write("Audio file saved. Starting speech recognition...")
     text = recognize_speech("audio.wav")
+    st.write(f"Speech recognition result: {text}")
 
     # Disease Prediction Model
+    st.write("Calling diagnostic model...")
     diagnostic = diagnostic_medic(text)
+    st.write(f"Diagnostic result: {diagnostic}")
 
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
     st.session_state.history.append({"message": f" Your disease would be {diagnostic}", "is_user": False})
 
     st.success("Medical consultation done")
+
 
 # ... (rest of your code)
 if __name__ == "__main__":
