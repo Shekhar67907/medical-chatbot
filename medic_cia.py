@@ -4,30 +4,23 @@ from audiorecorder import audiorecorder
 import time
 import json
 import requests
-from google.cloud import speech_v1p1beta1 as speech
-
-# Set your Google Cloud API key or service account credentials path
-google_api_key = "YOUR_GOOGLE_API_KEY_OR_SERVICE_ACCOUNT_JSON_PATH"
 
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-tiny.en"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 
-def recognize_speech(audio_content):
-    client = speech.SpeechClient.from_service_account_info(google_api_key)
-    
-    audio = speech.RecognitionAudio(content=audio_content)
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=16000,
-        language_code="en-US",
-    )
 
-    response = client.recognize(config=config, audio=audio)
+def recognize_speech(audio_file):
+    with open(audio_file, "rb") as f:
+        data = f.read()
 
-    for result in response.results:
-        return result.alternatives[0].transcript
+    response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
+    output = response.json()
+    final_output = output.get('text', 'Speech recognition failed')
+    return final_output
+
 
 def diagnostic_medic(voice_text):
     synthomps = {"inputs": voice_text}
@@ -43,11 +36,16 @@ def diagnostic_medic(voice_text):
 
     return final_output
 
+
 def generate_answer(audio):
     st.spinner("Consultation in progress...")
 
-    # Voice recognition model using Google Speech-to-Text API
-    text = recognize_speech(audio.raw_data)
+    # To save audio to a file:
+    with open("audio.wav", "wb") as wav_file:
+     wav_file.write(audio.raw_data)
+
+    # Voice recognition model
+     text = recognize_speech("./audio.wav")
 
     # Disease Prediction Model
     diagnostic = diagnostic_medic(text)
