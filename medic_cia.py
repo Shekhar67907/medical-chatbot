@@ -1,9 +1,11 @@
+from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import time
 import json
 import requests
+# ... (your other imports and code)
 
 token_hugging_face = "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"
 
@@ -41,11 +43,10 @@ def generate_answer(audio):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    wav_file = open("audio.wav", "wb")
-    wav_file.write(audio.tobytes())
+    audio.export("audio.wav", format="wav")
 
     # Voice recognition model
-    text = recognize_speech("./audio.wav")
+    text = recognize_speech("audio.wav")
 
     # Disease Prediction Model
     diagnostic = diagnostic_medic(text)
@@ -56,7 +57,7 @@ def generate_answer(audio):
 
     st.success("Medical consultation done")
 
-
+# ... (rest of your code)
 if __name__ == "__main__":
     # ... (rest of your code)
     # remove the hamburger in the upper right hand corner and the Made with Streamlit footer
