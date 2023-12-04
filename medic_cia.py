@@ -8,7 +8,7 @@ import requests
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
-API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-tiny.en"
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 
 
