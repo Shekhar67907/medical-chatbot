@@ -41,11 +41,11 @@ def generate_answer(audio):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    wav_file = open("audio.wav", "wb")
-    wav_file.write(audio.tobytes())
+    with open("audio.wav", "wb") as wav_file:
+        wav_file.write(audio.raw_data)
 
     # Voice recognition model
-    text = recognize_speech("./audio.wav")
+     text = recognize_speech("./audio.wav")
 
     # Disease Prediction Model
     diagnostic = diagnostic_medic(text)
@@ -55,7 +55,6 @@ def generate_answer(audio):
     st.session_state.history.append({"message": f" Your disease would be {diagnostic}", "is_user": False})
 
     st.success("Medical consultation done")
-
 
 if __name__ == "__main__":
     # ... (rest of your code)
