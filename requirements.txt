@@ -5,3 +5,4 @@ cython
 sentencepiece
 soundfile
 streamlit-audiorecorder
+ffmpeg-python
