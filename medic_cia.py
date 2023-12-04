@@ -12,8 +12,8 @@ API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whispe
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 
 
-def recognize_speech(audio_file_path):
-    with open(audio_file_path, "rb") as f:
+def recognize_speech(audio_file):
+    with open(audio_file, "rb") as f:
         data = f.read()
 
     response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
@@ -41,12 +41,11 @@ def generate_answer(audio):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    audio_file_path = "audio.wav"
-    with open(audio_file_path, "wb") as wav_file:
-        wav_file.write(audio.raw_data)
+    wav_file = open("audio.wav", "wb")
+    wav_file.write(audio.tobytes())
 
     # Voice recognition model
-    text = recognize_speech(audio_file_path)
+    text = recognize_speech("./audio.wav")
 
     # Disease Prediction Model
     diagnostic = diagnostic_medic(text)
@@ -56,6 +55,7 @@ def generate_answer(audio):
     st.session_state.history.append({"message": f" Your disease would be {diagnostic}", "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     # ... (rest of your code)
