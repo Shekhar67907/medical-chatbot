@@ -5,9 +5,10 @@ from audiorecorder import audiorecorder
 import time
 import json
 import requests
-# ... (your other imports and code)
 
-token_hugging_face = "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"
+
+# token_hugging_face = "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"
+token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-tiny.en"
@@ -62,9 +63,9 @@ def generate_answer(audio_recording):
     st.success("Medical consultation done")
 
 
-# ... (rest of your code)
+
 if __name__ == "__main__":
-    # ... (rest of your code)
+
     # remove the hamburger in the upper right hand corner and the Made with Streamlit footer
     hide_menu_style = """
         <style>
