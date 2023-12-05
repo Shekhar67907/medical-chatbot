@@ -2,12 +2,9 @@ from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
-import time
 import json
 import requests
 
-
-# token_hugging_face = "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"
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
@@ -20,6 +17,11 @@ def recognize_speech(audio_file):
         data = f.read()
 
     response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
+
+    if response.status_code != 200:
+        st.error(f"Speech recognition API error: {response.content}")
+        return "Speech recognition failed"
+
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
@@ -49,6 +51,11 @@ def generate_answer(audio_recording):
     # Voice recognition model
     st.write("Audio file saved. Starting speech recognition...")
     text = recognize_speech("audio.wav")
+
+    if "recognition failed" in text.lower():
+        st.error("Voice recognition failed. Please try again.")
+        return
+
     st.write(f"Speech recognition result: {text}")
 
     # Disease Prediction Model
@@ -63,16 +70,14 @@ def generate_answer(audio_recording):
     st.success("Medical consultation done")
 
 
-
 if __name__ == "__main__":
-
-    # remove the hamburger in the upper right hand corner and the Made with Streamlit footer
+    # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
     hide_menu_style = """
         <style>
         #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
+        footer {visibility: hidden;}
         </style>
-        """
+    """
     st.markdown(hide_menu_style, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
