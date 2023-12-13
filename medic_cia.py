@@ -38,8 +38,6 @@ def recognize_speech(audio_file, confidence_threshold=0.7):
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
 
-# Rest of your code...
-
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
     hide_menu_style = """
@@ -70,7 +68,8 @@ if __name__ == "__main__":
     audio = audiorecorder("Start recording", "Recording in progress...")
 
     if audio:
-        generate_answer(audio)
+        # Remove the call to generate_answer
+        # generate_answer(audio)
 
         for i, chat in enumerate(st.session_state.history):  # Show historical consultation
             st_message(**chat, key=str(i))
