@@ -48,9 +48,14 @@ def diagnostic_medic(voice_text):
     return final_output
 
 def format_diagnostic_results(results):
-    # Format the diagnostic results for presentation
-    formatted_results = "\n".join(f"{result['label']}: {result['score']}" for result in results)
-    return f'Top Diseases or Symptoms:\n{formatted_results}'
+    # Extract only the names of the diseases or symptoms
+    formatted_results = [result['label'] for result in results]
+
+    if not formatted_results:
+        return 'No diagnostic information available'
+
+    return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
+
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
