@@ -4,7 +4,7 @@ from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
 import requests
-import time  # Added for retry delay
+import time
 
 token_hugging_face = "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"
 
@@ -40,11 +40,18 @@ def diagnostic_medic(voice_text):
     output = response.json()
 
     try:
-        final_output = output[0][0]['label']
+        # Extract top diseases or symptoms based on the model's output
+        top_results = output[0][:5]  # Assuming the model returns a list of results
+        final_output = format_diagnostic_results(top_results)
     except (KeyError, IndexError):
         final_output = 'Diagnostic information not available'
 
     return final_output
+
+def format_diagnostic_results(results):
+    # Format the diagnostic results for presentation
+    formatted_results = "\n".join(f"{result['label']}: {result['score']}" for result in results)
+    return f'Top Diseases or Symptoms:\n{formatted_results}'
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -65,11 +72,11 @@ def generate_answer(audio_recording):
     # Disease Prediction Model
     st.write("Calling diagnostic model...")
     diagnostic = diagnostic_medic(text)
-    st.write(f"Diagnostic result: {diagnostic}")
+    st.write(f"Diagnostic result:\n{diagnostic}")
 
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
-    st.session_state.history.append({"message": f" Your disease would be {diagnostic}", "is_user": False})
+    st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
 
