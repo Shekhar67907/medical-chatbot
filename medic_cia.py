@@ -8,9 +8,8 @@ import requests
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
-API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-tiny.en"
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
-
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
@@ -26,7 +25,6 @@ def recognize_speech(audio_file):
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
 
-
 def diagnostic_medic(voice_text):
     synthomps = {"inputs": voice_text}
     data = json.dumps(synthomps)
@@ -40,7 +38,6 @@ def diagnostic_medic(voice_text):
         final_output = 'Diagnostic information not available'
 
     return final_output
-
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -68,7 +65,6 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": f" Your disease would be {diagnostic}", "is_user": False})
 
     st.success("Medical consultation done")
-
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
