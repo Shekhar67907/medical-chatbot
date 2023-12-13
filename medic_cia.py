@@ -4,18 +4,25 @@ from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
 import requests
+import time  # Added for retry delay
 
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
-API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
+API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/BillyTK616/distillbert-finetuned-medical-symptoms"
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
         data = f.read()
 
     response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
+
+    if response.status_code == 503:  # HTTP 503 Service Unavailable
+        estimated_time = response.json().get('estimated_time', 50.0)
+        st.warning(f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
+        time.sleep(estimated_time)
+        return recognize_speech(audio_file)  # Retry after waiting
 
     if response.status_code != 200:
         st.error(f"Speech recognition API error: {response.content}")
