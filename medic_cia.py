@@ -46,10 +46,13 @@ def diagnostic_medic(voice_text):
         final_output = 'Diagnostic information not available'
 
     return final_output
-
 def format_diagnostic_results(results):
-    # Extract only the names of the diseases or symptoms
-    formatted_results = [result['label'] for result in results]
+    # Sort the results based on the score in descending order
+    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
+
+    # Extract the names of the top 2 diseases or symptoms
+    top_results = sorted_results[:2]
+    formatted_results = [result['label'] for result in top_results]
 
     if not formatted_results:
         return 'No diagnostic information available'
