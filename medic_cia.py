@@ -1,16 +1,16 @@
+import requests
 from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
-import requests
 import time
 
 token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
-API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/BillyTK616/distillbert-finetuned-medical-symptoms"
+API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/alibidaran/Symptom2disease"
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
@@ -37,11 +37,10 @@ def diagnostic_medic(voice_text):
     data = json.dumps(synthomps)
 
     response = requests.post(API_URL_DIAGNOSTIC, headers=headers, data=data)
-    output = response.json()
-
+    
     try:
         # Extract top diseases or symptoms based on the model's output
-        top_results = output[0][:5]  # Assuming the model returns a list of results
+        top_results = response.json()[0][:5]  # Assuming the model returns a list of results
         final_output = format_diagnostic_results(top_results)
     except (KeyError, IndexError):
         final_output = 'Diagnostic information not available'
@@ -79,6 +78,9 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
+
+if __name__ == "__main__":
+    # ... (rest of your code)
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
