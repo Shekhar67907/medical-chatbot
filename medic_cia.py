@@ -64,7 +64,6 @@ def format_diagnostic_results(results):
 
     return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
 
-
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -75,8 +74,8 @@ def generate_answer(audio_recording):
     st.write("Audio file saved. Starting speech recognition...")
     text = recognize_speech("audio.wav")
 
-    if "recognition failed" in text.lower():
-        st.error("Voice recognition failed. Please try again.")
+    if "recognition failed" in text.lower() or len(text.strip()) < 5:
+        st.error("Voice recognition failed or the recognized text is too short. Please try again.")
         return
 
     st.write(f"Speech recognition result: {text}")
@@ -84,6 +83,11 @@ def generate_answer(audio_recording):
     # Disease Prediction Model
     st.write("Calling diagnostic model...")
     diagnostic = diagnostic_medic(text)
+
+    if "Diagnostic information not available" in diagnostic:
+        st.error("Diagnostic information not available. Please try again.")
+        return
+
     st.write(f"Diagnostic result:\n{diagnostic}")
 
     # Save conversation
