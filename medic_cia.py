@@ -10,40 +10,90 @@ token_hugging_face = "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"
 
 headers = {"Authorization": f"Bearer {token_hugging_face}"}
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
-API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/runaksh/Symptom-2-disease_distilBERT"
+API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 
-# ... (Previous code remains unchanged)
 
-def diagnostic_medic(voice_text):
-    payload = {"inputs": voice_text}
-    
-    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
+def recognize_speech(audio_file):
+    with open(audio_file, "rb") as f:
+        data = f.read()
+
+    response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
 
     if response.status_code == 503:  # HTTP 503 Service Unavailable
         estimated_time = response.json().get('estimated_time', 50.0)
         st.warning(
             f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
         time.sleep(estimated_time)
-        return diagnostic_medic(voice_text)  # Retry after waiting
+        return recognize_speech(audio_file)  # Retry after waiting
 
     if response.status_code != 200:
-        st.error(f"Diagnostic API error: {response.content}")
-        return "Diagnostic prediction failed"
+        st.error(f"Speech recognition API error: {response.content}")
+        return "Speech recognition failed"
 
     output = response.json()
-    
+    final_output = output.get('text', 'Speech recognition failed')
+    return final_output
+
+
+def diagnostic_medic(voice_text):
+    synthomps = {"inputs": voice_text}
+    data = json.dumps(synthomps)
+
+    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, data=data)
+
     try:
         # Extract top diseases or symptoms based on the model's output
-        top_results = output[0][:5]  # Assuming the model returns a list of results
+        top_results = response.json()[0][:5]  # Assuming the model returns a list of results
         final_output = format_diagnostic_results(top_results)
     except (KeyError, IndexError):
         final_output = 'Diagnostic information not available'
 
     return final_output
 
-# ... (Rest of the code remains unchanged)
 
-if __name__ == "__main__":
+def format_diagnostic_results(results):
+    # Sort the results based on the score in descending order
+    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
+
+    # Extract the names of the top 2 diseases or symptoms
+    top_results = sorted_results[:2]
+    formatted_results = [result['label'] for result in top_results]
+
+    if not formatted_results:
+        return 'No diagnostic information available'
+
+    return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
+
+
+def generate_answer(audio_recording):
+    st.spinner("Consultation in progress...")
+
+    # To save audio to a file:
+    audio_recording.export("audio.wav", format="wav")
+
+    # Voice recognition model
+    st.write("Audio file saved. Starting speech recognition...")
+    text = recognize_speech("audio.wav")
+
+    if "recognition failed" in text.lower():
+        st.error("Voice recognition failed. Please try again.")
+        return
+
+    st.write(f"Speech recognition result: {text}")
+
+    # Disease Prediction Model
+    st.write("Calling diagnostic model...")
+    diagnostic = diagnostic_medic(text)
+    st.write(f"Diagnostic result:\n{diagnostic}")
+
+    # Save conversation
+    st.session_state.history.append({"message": text, "is_user": True})
+    st.session_state.history.append({"message": diagnostic, "is_user": False})
+
+    st.success("Medical consultation done")
+
+
+if _name_ == "_main_":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
     hide_menu_style = """
         <style>
