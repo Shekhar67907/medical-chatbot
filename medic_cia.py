@@ -6,12 +6,10 @@ from audiorecorder import audiorecorder
 import json
 import time
 
-token_hugging_face = "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"
-
-headers = {"Authorization": f"Bearer {token_hugging_face}"}
+# Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
-API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
-
+API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/runaksh/Symptom-2-disease_distilBERT"
+headers = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
@@ -34,22 +32,18 @@ def recognize_speech(audio_file):
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
 
-
 def diagnostic_medic(voice_text):
-    synthomps = {"inputs": voice_text}
-    data = json.dumps(synthomps)
-
-    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, data=data)
+    payload = {"inputs": voice_text}
+    response = query(payload)  # Using the new API
 
     try:
         # Extract top diseases or symptoms based on the model's output
-        top_results = response.json()[0][:5]  # Assuming the model returns a list of results
+        top_results = response[0][:5]  # Assuming the model returns a list of results
         final_output = format_diagnostic_results(top_results)
     except (KeyError, IndexError):
         final_output = 'Diagnostic information not available'
 
     return final_output
-
 
 def format_diagnostic_results(results):
     # Sort the results based on the score in descending order
@@ -64,6 +58,9 @@ def format_diagnostic_results(results):
 
     return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
 
+def query(payload):
+    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
+    return response.json()
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -126,4 +123,3 @@ if __name__ == "__main__":
 
         for i, chat in enumerate(st.session_state.history):  # Show historical consultation
             st_message(**chat, key=str(i))
-
