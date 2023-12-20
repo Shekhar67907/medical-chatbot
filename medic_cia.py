@@ -64,7 +64,10 @@ def diagnostic_medic(voice_text):
         else:
             top_results_1 = response_1.get('predictions', [])
 
-        confidence_1 = top_results_1[0].get('score', 0.0)
+        if top_results_1:
+            confidence_1 = top_results_1[0].get('score', 0.0)
+        else:
+            confidence_1 = 0.0
     except (IndexError, AttributeError):
         confidence_1 = 0.0
 
@@ -76,7 +79,10 @@ def diagnostic_medic(voice_text):
         else:
             top_results_2 = response_2.get('predictions', [])
 
-        confidence_2 = top_results_2[0].get('score', 0.0)
+        if top_results_2:
+            confidence_2 = top_results_2[0].get('score', 0.0)
+        else:
+            confidence_2 = 0.0
     except (IndexError, AttributeError):
         confidence_2 = 0.0
 
@@ -87,6 +93,7 @@ def diagnostic_medic(voice_text):
         final_results = top_results_2
 
     return format_diagnostic_results(final_results)
+
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
