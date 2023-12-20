@@ -3,7 +3,6 @@ from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
-import json
 import time
 
 # Updated API details for Speech Recognition
@@ -41,17 +40,18 @@ def query_diagnostic(payload, api_url):
     return response.json()
 
 def format_diagnostic_results(results):
-    # Sort the results based on the score in descending order
-    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
+    # Check if results is not empty
+    if results:
+        # Assuming results is a list of dictionaries
+        sorted_results = sorted(results, key=lambda x: x.get('score', 0), reverse=True)
 
-    # Extract the names of the top 2 diseases
-    top_results = sorted_results[:2]
-    formatted_results = [result['label'] for result in top_results]
+        # Extract the names of the top 2 diseases
+        top_results = sorted_results[:2]
+        formatted_results = [result.get('label', 'Unknown Disease') for result in top_results]
 
-    if not formatted_results:
-        return 'No diagnostic information available'
+        return f'Top Diseases:\n{", ".join(formatted_results)}'
 
-    return f'Top Diseases:\n{", ".join(formatted_results)}'
+    return 'No diagnostic information available'
 
 def diagnostic_medic(voice_text):
     payload = {"inputs": voice_text}
