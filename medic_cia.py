@@ -53,11 +53,11 @@ def diagnostic_medic(voice_text):
 
     # Query the first diagnostic model
     response_1 = query_diagnostic_with_retry(payload, APIConfig.DIAGNOSTIC_URL_1)
-    confidence_1 = response_1[0].get('score', 0.0) if response_1 else 0.0
+    confidence_1 = response_1[0].get('score', 0.0) if isinstance(response_1, list) and response_1 else 0.0
 
     # Query the second diagnostic model
     response_2 = query_diagnostic_with_retry(payload, APIConfig.DIAGNOSTIC_URL_2)
-    confidence_2 = response_2[0].get('score', 0.0) if response_2 else 0.0
+    confidence_2 = response_2[0].get('score', 0.0) if isinstance(response_2, list) and response_2 else 0.0
 
     # Compare confidence scores and determine the final diagnostic result
     if confidence_1 > confidence_2:
@@ -75,6 +75,7 @@ def diagnostic_medic(voice_text):
     top_symptom, top_confidence = sorted_symptoms[0] if sorted_symptoms else ('Unknown Symptom', 0.0)
 
     return f'Highest Confidence Symptom: {top_symptom} (Confidence: {top_confidence:.2f})'
+
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
