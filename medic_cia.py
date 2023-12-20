@@ -66,7 +66,10 @@ def diagnostic_medic(voice_text):
         final_results = response_2
 
     # Extract the symptoms with their confidence levels
-    symptoms_with_confidence = [(result.get('label', 'Unknown Symptom'), result.get('score', 0.0)) for result in final_results] if final_results else []
+    if isinstance(final_results, list) and final_results:
+        symptoms_with_confidence = [(result.get('label', 'Unknown Symptom'), result.get('score', 0.0)) for result in final_results]
+    else:
+        symptoms_with_confidence = []
 
     # Sort symptoms by confidence level in descending order
     sorted_symptoms = sorted(symptoms_with_confidence, key=lambda x: x[1], reverse=True)
@@ -75,6 +78,9 @@ def diagnostic_medic(voice_text):
     top_symptom, top_confidence = sorted_symptoms[0] if sorted_symptoms else ('Unknown Symptom', 0.0)
 
     return f'Highest Confidence Symptom: {top_symptom} (Confidence: {top_confidence:.2f})'
+
+# Rest of the code remains unchanged
+
 
 
 def generate_answer(audio_recording):
