@@ -6,13 +6,10 @@ from audiorecorder import audiorecorder
 import json
 import time
 
-# Updated API details for Speech Recognition
-API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-large-v2"
+# Updated API details
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
+API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/DinaSalama/symptom_to_disease_distb"
 headers = {"Authorization": "Bearer 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"}
-
-# Updated API details for Disease Prediction
-API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
-headers_diagnostic = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
@@ -37,11 +34,11 @@ def recognize_speech(audio_file):
 
 def diagnostic_medic(voice_text):
     payload = {"inputs": voice_text}
-    response = query_diagnostic(payload)  # Using the new API for disease prediction
+    response = query(payload)  # Using the new API
 
     try:
-        # Extract top diseases based on the model's output
-        top_results = response.get('predictions', [])
+        # Extract top diseases or symptoms based on the model's output
+        top_results = response[0][:5]  # Assuming the model returns a list of results
         final_output = format_diagnostic_results(top_results)
     except (KeyError, IndexError):
         final_output = 'Diagnostic information not available'
@@ -52,28 +49,28 @@ def format_diagnostic_results(results):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    # Extract the names of the top 2 diseases
+    # Extract the names of the top 2 diseases or symptoms
     top_results = sorted_results[:2]
     formatted_results = [result['label'] for result in top_results]
 
     if not formatted_results:
         return 'No diagnostic information available'
 
-    return f'Top Diseases:\n{", ".join(formatted_results)}'
+    return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
 
-def query_diagnostic(payload):
-    response = requests.post(API_URL_DIAGNOSTIC, headers=headers_diagnostic, json=payload)
+def query(payload):
+    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
     return response.json()
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    audio_recording.export("audio.flac", format="flac")  # Save as FLAC for Whisper ASR
+    audio_recording.export("audio.wav", format="wav")
 
     # Voice recognition model
     st.write("Audio file saved. Starting speech recognition...")
-    text = recognize_speech("audio.flac")  # Use Whisper ASR for speech recognition
+    text = recognize_speech("audio.wav")
 
     if "recognition failed" in text.lower():
         st.error("Voice recognition failed. Please try again.")
