@@ -7,7 +7,7 @@ import json
 import time
 
 # Updated API details
-API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/openai/whisper-large-v2"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/DinaSalama/symptom_to_disease_distb"
 headers = {"Authorization": "Bearer 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"}
 
@@ -66,11 +66,11 @@ def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
-    audio_recording.export("audio.wav", format="wav")
+    audio_recording.export("audio.flac", format="flac")  # Save as FLAC for Whisper ASR
 
     # Voice recognition model
     st.write("Audio file saved. Starting speech recognition...")
-    text = recognize_speech("audio.wav")
+    text = recognize_speech("audio.flac")  # Use Whisper ASR for speech recognition
 
     if "recognition failed" in text.lower():
         st.error("Voice recognition failed. Please try again.")
