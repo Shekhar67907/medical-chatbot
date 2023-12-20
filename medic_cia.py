@@ -39,15 +39,22 @@ def query_diagnostic(payload, api_url):
     response = requests.post(api_url, headers=headers_diagnostic, json=payload)
     return response.json()
 
+
 def format_diagnostic_results(results):
     # Check if results is not empty
     if results:
         # Assuming results is a list of dictionaries
         sorted_results = sorted(results, key=lambda x: x.get('score', 0) if isinstance(x, dict) else 0, reverse=True)
 
+        # Print the sorted_results for debugging
+        print("Sorted Results:", sorted_results)
+
         # Extract the names of the top 2 diseases
         top_results = sorted_results[:2]
         formatted_results = [result.get('label', 'Unknown Disease') if isinstance(result, dict) else 'Unknown Disease' for result in top_results]
+
+        # Print the formatted_results for debugging
+        print("Formatted Results:", formatted_results)
 
         return f'Top Diseases:\n{", ".join(formatted_results)}'
 
@@ -71,6 +78,11 @@ def diagnostic_medic(voice_text):
     except (IndexError, AttributeError):
         confidence_1 = 0.0
 
+    # Print the response for debugging
+    print("Response 1:", response_1)
+    print("Top Results 1:", top_results_1)
+    print("Confidence 1:", confidence_1)
+
     # Query the second diagnostic model
     response_2 = query_diagnostic(payload, API_URL_DIAGNOSTIC_2)
     try:
@@ -85,6 +97,11 @@ def diagnostic_medic(voice_text):
             confidence_2 = 0.0
     except (IndexError, AttributeError):
         confidence_2 = 0.0
+
+    # Print the response for debugging
+    print("Response 2:", response_2)
+    print("Top Results 2:", top_results_2)
+    print("Confidence 2:", confidence_2)
 
     # Compare confidence scores and determine the final diagnostic result
     if confidence_1 > confidence_2:
