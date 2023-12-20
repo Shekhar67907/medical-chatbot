@@ -40,8 +40,6 @@ def query_diagnostic(payload, api_url):
     return response.json()
 
 
-# ... (previous code)
-
 def format_diagnostic_results(results):
     # Check if results is not empty
     if results and isinstance(results, list):
@@ -113,9 +111,6 @@ def diagnostic_medic(voice_text):
 
     return format_diagnostic_results(final_results)
 
-# ... (rest of the code)
-
-
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -141,6 +136,9 @@ def generate_answer(audio_recording):
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
     st.session_state.history.append({"message": diagnostic, "is_user": False})
+
+    # Print for debugging
+    print("Final Results:", diagnostic)
 
     st.success("Medical consultation done")
 
