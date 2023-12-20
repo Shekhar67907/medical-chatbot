@@ -147,7 +147,6 @@ def generate_answer(audio_recording):
     print("Final Results:", diagnostic)
 
     st.success("Medical consultation done")
-
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
     hide_menu_style = """
@@ -175,4 +174,4 @@ if __name__ == "__main__":
     st.title("Medical Diagnostic Assistant")
 
     # Show Input
-    audio = audiorecorder("Start recording", "Recording in progress...
+    audio = audiorecorder("Start recording", "Recording in progress...")
