@@ -40,9 +40,11 @@ def query_diagnostic(payload, api_url):
     return response.json()
 
 
+# ... (previous code)
+
 def format_diagnostic_results(results):
     # Check if results is not empty
-    if results:
+    if results and isinstance(results, list):
         # Assuming results is a list of dictionaries
         sorted_results = sorted(results, key=lambda x: x.get('score', 0) if isinstance(x, dict) else 0, reverse=True)
 
@@ -51,7 +53,7 @@ def format_diagnostic_results(results):
 
         # Extract the names of the top 2 diseases
         top_results = sorted_results[:2]
-        formatted_results = [result.get('label', 'Unknown Disease') if isinstance(result, dict) else 'Unknown Disease' for result in top_results]
+        formatted_results = [result.get('label', 'Unknown Disease') if isinstance(result, dict) and 'label' in result else 'Unknown Disease' for result in top_results]
 
         # Print the formatted_results for debugging
         print("Formatted Results:", formatted_results)
@@ -110,6 +112,9 @@ def diagnostic_medic(voice_text):
         final_results = top_results_2
 
     return format_diagnostic_results(final_results)
+
+# ... (rest of the code)
+
 
 
 def generate_answer(audio_recording):
