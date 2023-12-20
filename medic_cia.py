@@ -35,10 +35,17 @@ def recognize_speech(audio_file):
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
 
-def query_diagnostic(payload, api_url):
+def query_diagnostic_with_retry(payload, api_url):
     response = requests.post(api_url, headers=headers_diagnostic, json=payload)
-    return response.json()
 
+    if response.status_code == 503:  # HTTP 503 Service Unavailable
+        estimated_time = response.json().get('estimated_time', 20.0)
+        st.warning(
+            f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
+        time.sleep(estimated_time)
+        return query_diagnostic_with_retry(payload, api_url)  # Retry after waiting
+
+    return response.json()
 
 def format_diagnostic_results(results):
     # Check if results is not empty
@@ -64,7 +71,7 @@ def diagnostic_medic(voice_text):
     payload = {"inputs": voice_text}
 
     # Query the first diagnostic model
-    response_1 = query_diagnostic(payload, API_URL_DIAGNOSTIC_1)
+    response_1 = query_diagnostic_with_retry(payload, API_URL_DIAGNOSTIC_1)
     try:
         if isinstance(response_1, list):
             top_results_1 = response_1
@@ -84,7 +91,7 @@ def diagnostic_medic(voice_text):
     print("Confidence 1:", confidence_1)
 
     # Query the second diagnostic model
-    response_2 = query_diagnostic(payload, API_URL_DIAGNOSTIC_2)
+    response_2 = query_diagnostic_with_retry(payload, API_URL_DIAGNOSTIC_2)
     try:
         if isinstance(response_2, list):
             top_results_2 = response_2
@@ -110,7 +117,6 @@ def diagnostic_medic(voice_text):
         final_results = top_results_2
 
     return format_diagnostic_results(final_results)
-
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -169,10 +175,4 @@ if __name__ == "__main__":
     st.title("Medical Diagnostic Assistant")
 
     # Show Input
-    audio = audiorecorder("Start recording", "Recording in progress...")
-
-    if audio:
-        generate_answer(audio)
-
-        for i, chat in enumerate(st.session_state.history):  # Show historical consultation
-            st_message(**chat, key=str(i))
+    audio = audiorecorder("Start recording", "Recording in progress...
