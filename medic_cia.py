@@ -59,7 +59,11 @@ def diagnostic_medic(voice_text):
     # Query the first diagnostic model
     response_1 = query_diagnostic(payload, API_URL_DIAGNOSTIC_1)
     try:
-        top_results_1 = response_1.get('predictions', [])
+        if isinstance(response_1, list):
+            top_results_1 = response_1
+        else:
+            top_results_1 = response_1.get('predictions', [])
+
         confidence_1 = top_results_1[0]['score']
     except (KeyError, IndexError):
         confidence_1 = 0.0
@@ -67,7 +71,11 @@ def diagnostic_medic(voice_text):
     # Query the second diagnostic model
     response_2 = query_diagnostic(payload, API_URL_DIAGNOSTIC_2)
     try:
-        top_results_2 = response_2.get('predictions', [])
+        if isinstance(response_2, list):
+            top_results_2 = response_2
+        else:
+            top_results_2 = response_2.get('predictions', [])
+
         confidence_2 = top_results_2[0]['score']
     except (KeyError, IndexError):
         confidence_2 = 0.0
