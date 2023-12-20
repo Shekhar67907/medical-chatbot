@@ -64,8 +64,8 @@ def diagnostic_medic(voice_text):
         else:
             top_results_1 = response_1.get('predictions', [])
 
-        confidence_1 = top_results_1[0]['score']
-    except (KeyError, IndexError):
+        confidence_1 = top_results_1[0].get('score', 0.0)
+    except (IndexError, AttributeError):
         confidence_1 = 0.0
 
     # Query the second diagnostic model
@@ -76,8 +76,8 @@ def diagnostic_medic(voice_text):
         else:
             top_results_2 = response_2.get('predictions', [])
 
-        confidence_2 = top_results_2[0]['score']
-    except (KeyError, IndexError):
+        confidence_2 = top_results_2[0].get('score', 0.0)
+    except (IndexError, AttributeError):
         confidence_2 = 0.0
 
     # Compare confidence scores and determine the final diagnostic result
