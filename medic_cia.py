@@ -43,11 +43,11 @@ def format_diagnostic_results(results):
     # Check if results is not empty
     if results:
         # Assuming results is a list of dictionaries
-        sorted_results = sorted(results, key=lambda x: x.get('score', 0), reverse=True)
+        sorted_results = sorted(results, key=lambda x: x.get('score', 0) if isinstance(x, dict) else 0, reverse=True)
 
         # Extract the names of the top 2 diseases
         top_results = sorted_results[:2]
-        formatted_results = [result.get('label', 'Unknown Disease') for result in top_results]
+        formatted_results = [result.get('label', 'Unknown Disease') if isinstance(result, dict) else 'Unknown Disease' for result in top_results]
 
         return f'Top Diseases:\n{", ".join(formatted_results)}'
 
