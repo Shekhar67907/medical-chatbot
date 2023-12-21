@@ -79,11 +79,16 @@ def query_new_diagnostic_model(payload):
 def choose_highest_confidence(*results):
     try:
         # Flatten the results into a single list of dictionaries
-        flattened_results = [result[0] if isinstance(result, list) else result for result in results]
+        flattened_results = [
+            result if isinstance(result, dict) else result[0] for result in results
+        ]
 
         # Compare confidence levels and choose the one with the highest confidence
-        return max(flattened_results, key=lambda x: x['score'])
-    except (KeyError, TypeError, IndexError):
+        final_diagnostic = max(flattened_results, key=lambda x: x['score'])
+
+        return final_diagnostic
+
+    except (KeyError, TypeError, ValueError):
         return {"error": "Invalid diagnostic result format"}
 
 def generate_answer(audio_recording):
