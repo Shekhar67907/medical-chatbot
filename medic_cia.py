@@ -76,12 +76,20 @@ def query_new_diagnostic_model(payload):
     response = requests.post(API_URL_NEW_DIAGNOSTIC, headers=headers, json=payload)
     return response.json()
 
+
 def choose_highest_confidence(*results):
     try:
         # Flatten the results into a single list of dictionaries
-        flattened_results = [
-            result if isinstance(result, dict) else result[0] for result in results
-        ]
+        flattened_results = []
+
+        for result in results:
+            if isinstance(result, dict):
+                flattened_results.append(result)
+            elif isinstance(result, list) and result:
+                flattened_results.append(result[0])
+
+        if not flattened_results:
+            raise ValueError("No valid diagnostic results found")
 
         # Compare confidence levels and choose the one with the highest confidence
         final_diagnostic = max(flattened_results, key=lambda x: x['score'])
@@ -90,6 +98,7 @@ def choose_highest_confidence(*results):
 
     except (KeyError, TypeError, ValueError):
         return {"error": "Invalid diagnostic result format"}
+
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
