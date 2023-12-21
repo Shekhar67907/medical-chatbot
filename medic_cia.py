@@ -52,8 +52,14 @@ def query(payload):
 
 def format_diagnostic_results(results):
     try:
-        # Sort the results based on the score in descending order
-        sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
+        if isinstance(results[0], list):
+            # Assuming it's a list of results, so no need to change the format
+            sorted_results = sorted(results[0], key=lambda x: x['score'], reverse=True)
+        elif isinstance(results[0], dict):
+            # Assuming it's a dictionary, so wrap it in a list
+            sorted_results = sorted([results[0]], key=lambda x: x['score'], reverse=True)
+        else:
+            raise TypeError("Invalid diagnostic result format")
 
         # Extract the names of the top 2 diseases or symptoms
         top_results = sorted_results[:2]
