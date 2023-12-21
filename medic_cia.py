@@ -78,7 +78,7 @@ def choose_highest_confidence(*results):
         ]
 
         # Compare confidence levels and choose the one with the highest confidence
-        final_diagnostic = max(flattened_results, key=lambda x: x['score'])
+        final_diagnostic = max(flattened_results, key=lambda x: x.get('score', 0))
 
         return final_diagnostic
 
@@ -136,6 +136,7 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": final_diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
+
 
 
 if __name__ == "__main__":
