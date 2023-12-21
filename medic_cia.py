@@ -52,14 +52,8 @@ def query(payload):
 
 def format_diagnostic_results(results):
     try:
-        if isinstance(results[0], list):
-            # Assuming it's a list of results, so no need to change the format
-            sorted_results = sorted(results[0], key=lambda x: x['score'], reverse=True)
-        elif isinstance(results[0], dict):
-            # Assuming it's a dictionary, so wrap it in a list
-            sorted_results = sorted([results[0]], key=lambda x: x['score'], reverse=True)
-        else:
-            raise TypeError("Invalid diagnostic result format")
+        # Assuming it's a list of results, so no need to change the format
+        sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
         # Extract the names of the top 2 diseases or symptoms
         top_results = sorted_results[:2]
@@ -79,25 +73,16 @@ def query_new_diagnostic_model(payload):
 def choose_highest_confidence(*results):
     try:
         # Flatten the results into a single list of dictionaries
-        flattened_results = []
-
-        for i, result in enumerate(results):
-            if isinstance(result, list) and result:
-                flattened_results.extend(result)
-            elif isinstance(result, dict):
-                flattened_results.append(result)
-
-        if not flattened_results:
-            raise ValueError("No valid diagnostic results found")
+        flattened_results = [
+            result if isinstance(result, dict) else result[0] for result in results
+        ]
 
         # Compare confidence levels and choose the one with the highest confidence
         final_diagnostic = max(flattened_results, key=lambda x: x['score'])
 
         return final_diagnostic
 
-    except (KeyError, TypeError, ValueError) as e:
-        print(f"Error in choose_highest_confidence: {e}")
-        print(f"Results: {results}")
+    except (KeyError, TypeError, ValueError):
         return {"error": "Invalid diagnostic result format"}
 
 def generate_answer(audio_recording):
@@ -134,21 +119,10 @@ def generate_answer(audio_recording):
         st.error(f"Error calling the new diagnostic model: {str(e)}")
         new_model_result = {"error": "New diagnostic model error"}
 
-    try:
-        # Additional Disease Prediction Model
-        st.write("Calling additional diagnostic model...")
-        additional_model_result = query({
-            "inputs": "I like you. I love you",  # Adjust the input based on the actual requirements
-        })
-        st.write(f"Additional diagnostic result:\n{additional_model_result}")
-    except Exception as e:
-        st.error(f"Error calling the additional diagnostic model: {str(e)}")
-        additional_model_result = {"error": "Additional diagnostic model error"}
-
     # Compare confidence levels and choose the one with higher confidence
     try:
         final_diagnostic = choose_highest_confidence(
-            diagnostic_result, new_model_result, additional_model_result
+            diagnostic_result, new_model_result
         )
 
         st.write(f"Final diagnostic result:\n{format_diagnostic_results(final_diagnostic)}")
