@@ -86,7 +86,7 @@ def choose_highest_confidence(*results):
             if isinstance(result, dict):
                 flattened_results.append(result)
             elif isinstance(result, list) and result:
-                flattened_results.append(result[0])
+                flattened_results.extend(result)
 
         if not flattened_results:
             raise ValueError("No valid diagnostic results found")
@@ -100,6 +100,7 @@ def choose_highest_confidence(*results):
         print(f"Error in choose_highest_confidence: {e}")
         print(f"Results: {results}")
         return {"error": "Invalid diagnostic result format"}
+
 
 
 def generate_answer(audio_recording):
