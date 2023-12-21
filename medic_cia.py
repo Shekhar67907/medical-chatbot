@@ -76,6 +76,16 @@ def query_new_diagnostic_model(payload):
     response = requests.post(API_URL_NEW_DIAGNOSTIC, headers=headers, json=payload)
     return response.json()
 
+def choose_highest_confidence(*results):
+    try:
+        # Flatten the results into a single list of dictionaries
+        flattened_results = [result[0] if isinstance(result, list) else result for result in results]
+
+        # Compare confidence levels and choose the one with the highest confidence
+        return max(flattened_results, key=lambda x: x['score'])
+    except (KeyError, TypeError, IndexError):
+        return {"error": "Invalid diagnostic result format"}
+
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -139,13 +149,6 @@ def generate_answer(audio_recording):
 
     st.success("Medical consultation done")
 
-
-def choose_highest_confidence(*results):
-    try:
-        # Compare confidence levels and choose the one with the highest confidence
-        return max(results, key=lambda x: x[0]['score'])
-    except (KeyError, TypeError, IndexError):
-        return {"error": "Invalid diagnostic result format"}
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
