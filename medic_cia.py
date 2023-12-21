@@ -9,7 +9,6 @@ import time
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/DinaSalama/symptom_to_disease_distb"
-API_URL_NEW_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 headers = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio_file):
@@ -35,7 +34,7 @@ def recognize_speech(audio_file):
 
 def diagnostic_medic(voice_text):
     payload = {"inputs": voice_text}
-    response = query(payload)  # Using the existing diagnostic model
+    response = query(payload)  # Using the new API
 
     try:
         # Extract top diseases or symptoms based on the model's output
@@ -46,44 +45,22 @@ def diagnostic_medic(voice_text):
 
     return final_output
 
+def format_diagnostic_results(results):
+    # Sort the results based on the score in descending order
+    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
+
+    # Extract the names of the top 2 diseases or symptoms
+    top_results = sorted_results[:2]
+    formatted_results = [result['label'] for result in top_results]
+
+    if not formatted_results:
+        return 'No diagnostic information available'
+
+    return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
+
 def query(payload):
     response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
     return response.json()
-
-def format_diagnostic_results(results):
-    try:
-        # Assuming it's a list of results, so no need to change the format
-        sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
-
-        # Extract the names of the top 2 diseases or symptoms
-        top_results = sorted_results[:2]
-        formatted_results = [result['label'] for result in top_results]
-
-        if not formatted_results:
-            return 'No diagnostic information available'
-
-        return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
-    except (KeyError, TypeError, IndexError):
-        return 'Invalid diagnostic result format'
-
-def query_new_diagnostic_model(payload):
-    response = requests.post(API_URL_NEW_DIAGNOSTIC, headers=headers, json=payload)
-    return response.json()
-
-def choose_highest_confidence(*results):
-    try:
-        # Flatten the results into a single list of dictionaries
-        flattened_results = [
-            result if isinstance(result, dict) else result[0] for result in results
-        ]
-
-        # Compare confidence levels and choose the one with the highest confidence
-        final_diagnostic = max(flattened_results, key=lambda x: x.get('score', 0))
-
-        return final_diagnostic
-
-    except (KeyError, TypeError, ValueError):
-        return {"error": "Invalid diagnostic result format"}
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -101,43 +78,16 @@ def generate_answer(audio_recording):
 
     st.write(f"Speech recognition result: {text}")
 
-    try:
-        # Existing Disease Prediction Model
-        st.write("Calling diagnostic model...")
-        diagnostic_result = diagnostic_medic(text)
-        st.write(f"Diagnostic result:\n{diagnostic_result}")
-    except Exception as e:
-        st.error(f"Error calling the existing diagnostic model: {str(e)}")
-        diagnostic_result = {"error": "Diagnostic model error"}
-
-    try:
-        # New Disease Prediction Model
-        st.write("Calling new diagnostic model...")
-        new_model_result = query_new_diagnostic_model({"inputs": text})
-        st.write(f"New diagnostic result:\n{new_model_result}")
-    except Exception as e:
-        st.error(f"Error calling the new diagnostic model: {str(e)}")
-        new_model_result = {"error": "New diagnostic model error"}
-
-    # Compare confidence levels and choose the one with higher confidence
-    try:
-        final_diagnostic = choose_highest_confidence(
-            diagnostic_result, new_model_result
-        )
-
-        st.write(f"Final diagnostic result:\n{format_diagnostic_results(final_diagnostic)}")
-
-    except Exception as e:
-        st.error(f"Error comparing diagnostic results: {str(e)}")
-        final_diagnostic = {"error": "Diagnostic result comparison error"}
+    # Disease Prediction Model
+    st.write("Calling diagnostic model...")
+    diagnostic = diagnostic_medic(text)
+    st.write(f"Diagnostic result:\n{diagnostic}")
 
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
-    st.session_state.history.append({"message": final_diagnostic, "is_user": False})
+    st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
-
-
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
