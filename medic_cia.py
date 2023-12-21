@@ -86,13 +86,9 @@ def generate_answer(audio_recording):
         st.error("Voice recognition failed. Please try again.")
         return
 
-    st.write(f"Speech recognition result: {text}")
-
     # Disease Prediction Model
     st.write("Calling diagnostic models...")
     diagnostic = diagnostic_medic(text)
-    st.write(f"Diagnostic result:\n{diagnostic}")
-
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
 
