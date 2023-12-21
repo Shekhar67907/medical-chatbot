@@ -51,17 +51,20 @@ def query(payload):
     return response.json()
 
 def format_diagnostic_results(results):
-    # Sort the results based on the score in descending order
-    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
+    try:
+        # Sort the results based on the score in descending order
+        sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    # Extract the names of the top 2 diseases or symptoms
-    top_results = sorted_results[:2]
-    formatted_results = [result['label'] for result in top_results]
+        # Extract the names of the top 2 diseases or symptoms
+        top_results = sorted_results[:2]
+        formatted_results = [result['label'] for result in top_results]
 
-    if not formatted_results:
-        return 'No diagnostic information available'
+        if not formatted_results:
+            return 'No diagnostic information available'
 
-    return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
+        return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
+    except (KeyError, TypeError, IndexError):
+        return 'Invalid diagnostic result format'
 
 def query_new_diagnostic_model(payload):
     response = requests.post(API_URL_NEW_DIAGNOSTIC, headers=headers, json=payload)
@@ -132,9 +135,11 @@ def generate_answer(audio_recording):
 
 
 def choose_highest_confidence(*results):
-    # Compare confidence levels and choose the one with the highest confidence
-    return max(results, key=lambda x: x.get("score", 0.0))
-
+    try:
+        # Compare confidence levels and choose the one with the highest confidence
+        return max(results, key=lambda x: x[0]['score'])
+    except (KeyError, TypeError, IndexError):
+        return {"error": "Invalid diagnostic result format"}
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
