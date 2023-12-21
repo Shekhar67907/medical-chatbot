@@ -37,7 +37,6 @@ def recognize_speech(audio_file):
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
-
 def diagnostic_medic(voice_text):
     model_results = []
 
@@ -51,10 +50,14 @@ def diagnostic_medic(voice_text):
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
 
+    if not model_results:
+        return 'No diagnostic information available'
+
     # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
     
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+
 
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
