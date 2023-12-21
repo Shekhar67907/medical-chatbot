@@ -9,6 +9,7 @@ import time
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
 API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/DinaSalama/symptom_to_disease_distb"
+API_URL_NEW_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"
 headers = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio_file):
@@ -34,7 +35,7 @@ def recognize_speech(audio_file):
 
 def diagnostic_medic(voice_text):
     payload = {"inputs": voice_text}
-    response = query(payload)  # Using the new API
+    response = query(payload)  # Using the existing diagnostic model
 
     try:
         # Extract top diseases or symptoms based on the model's output
@@ -44,6 +45,10 @@ def diagnostic_medic(voice_text):
         final_output = 'Diagnostic information not available'
 
     return final_output
+
+def query(payload):
+    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
+    return response.json()
 
 def format_diagnostic_results(results):
     # Sort the results based on the score in descending order
@@ -58,8 +63,8 @@ def format_diagnostic_results(results):
 
     return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
 
-def query(payload):
-    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
+def query_new_diagnostic_model(payload):
+    response = requests.post(API_URL_NEW_DIAGNOSTIC, headers=headers, json=payload)
     return response.json()
 
 def generate_answer(audio_recording):
@@ -78,16 +83,58 @@ def generate_answer(audio_recording):
 
     st.write(f"Speech recognition result: {text}")
 
-    # Disease Prediction Model
-    st.write("Calling diagnostic model...")
-    diagnostic = diagnostic_medic(text)
-    st.write(f"Diagnostic result:\n{diagnostic}")
+    try:
+        # Existing Disease Prediction Model
+        st.write("Calling diagnostic model...")
+        diagnostic_result = diagnostic_medic(text)
+        st.write(f"Diagnostic result:\n{diagnostic_result}")
+    except Exception as e:
+        st.error(f"Error calling the existing diagnostic model: {str(e)}")
+        diagnostic_result = {"error": "Diagnostic model error"}
+
+    try:
+        # New Disease Prediction Model
+        st.write("Calling new diagnostic model...")
+        new_model_result = query_new_diagnostic_model({"inputs": text})
+        st.write(f"New diagnostic result:\n{new_model_result}")
+    except Exception as e:
+        st.error(f"Error calling the new diagnostic model: {str(e)}")
+        new_model_result = {"error": "New diagnostic model error"}
+
+    try:
+        # Additional Disease Prediction Model
+        st.write("Calling additional diagnostic model...")
+        additional_model_result = query({
+            "inputs": "I like you. I love you",  # Adjust the input based on the actual requirements
+        })
+        st.write(f"Additional diagnostic result:\n{additional_model_result}")
+    except Exception as e:
+        st.error(f"Error calling the additional diagnostic model: {str(e)}")
+        additional_model_result = {"error": "Additional diagnostic model error"}
+
+    # Compare confidence levels and choose the one with higher confidence
+    try:
+        final_diagnostic = choose_highest_confidence(
+            diagnostic_result, new_model_result, additional_model_result
+        )
+
+        st.write(f"Final diagnostic result:\n{format_diagnostic_results(final_diagnostic)}")
+
+    except Exception as e:
+        st.error(f"Error comparing diagnostic results: {str(e)}")
+        final_diagnostic = {"error": "Diagnostic result comparison error"}
 
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
-    st.session_state.history.append({"message": diagnostic, "is_user": False})
+    st.session_state.history.append({"message": final_diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
+
+
+def choose_highest_confidence(*results):
+    # Compare confidence levels and choose the one with the highest confidence
+    return max(results, key=lambda x: x.get("score", 0.0))
+
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
