@@ -93,11 +93,15 @@ def generate_answer(audio_recording):
     diagnostic = diagnostic_medic(text)
     st.write(f"Diagnostic result:\n{diagnostic}")
 
+    # Add the statement for more detailed symptoms
+    st.write("Please provide more detailed symptoms for precise recognition.")
+
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
