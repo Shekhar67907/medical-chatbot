@@ -8,7 +8,7 @@ import time
 
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
-API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/DinaSalama/symptom_to_disease_distb"
+API_URL_DIAGNOSTIC = "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"  # Updated API URL
 headers = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio_file):
@@ -33,12 +33,12 @@ def recognize_speech(audio_file):
     return final_output
 
 def diagnostic_medic(voice_text):
-    payload = {"inputs": voice_text}
-    response = query(payload)  # Using the new API
+    payload = {"inputs": [voice_text]}  # Changed payload to include a list of strings
+    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)  # Using the new API
 
     try:
         # Extract top diseases or symptoms based on the model's output
-        top_results = response[0][:5]  # Assuming the model returns a list of results
+        top_results = response.json()[0][:5]  # Assuming the model returns a list of results
         final_output = format_diagnostic_results(top_results)
     except (KeyError, IndexError):
         final_output = 'Diagnostic information not available'
@@ -57,10 +57,6 @@ def format_diagnostic_results(results):
         return 'No diagnostic information available'
 
     return f'Top Diseases or Symptoms:\n{", ".join(formatted_results)}'
-
-def query(payload):
-    response = requests.post(API_URL_DIAGNOSTIC, headers=headers, json=payload)
-    return response.json()
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
