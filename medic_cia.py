@@ -82,7 +82,7 @@ def choose_highest_confidence(*results):
         # Flatten the results into a single list of dictionaries
         flattened_results = []
 
-        for result in results:
+        for i, result in enumerate(results):
             if isinstance(result, dict):
                 flattened_results.append(result)
             elif isinstance(result, list) and result:
@@ -96,7 +96,9 @@ def choose_highest_confidence(*results):
 
         return final_diagnostic
 
-    except (KeyError, TypeError, ValueError):
+    except (KeyError, TypeError, ValueError) as e:
+        print(f"Error in choose_highest_confidence: {e}")
+        print(f"Results: {results}")
         return {"error": "Invalid diagnostic result format"}
 
 
