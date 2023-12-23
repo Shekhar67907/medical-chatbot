@@ -37,6 +37,7 @@ def recognize_speech(audio_file):
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
+
 def diagnostic_medic(voice_text):
     model_results = []
 
@@ -58,7 +59,6 @@ def diagnostic_medic(voice_text):
     
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
-
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
@@ -72,7 +72,21 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{", ".join(formatted_results)}'
 
-def generate_answer(audio_recording):
+def calculate_accuracy(ground_truth, history):
+    correct_predictions = 0
+
+    for chat in history:
+        if not chat["is_user"]:
+            user_id = chat.get("user_id", "")  # Assuming you have a way to identify users
+            if user_id in ground_truth and ground_truth[user_id] == chat["message"]:
+                correct_predictions += 1
+
+    total_users = len(ground_truth)
+    accuracy = correct_predictions / total_users * 100
+
+    return accuracy
+
+def generate_answer(audio_recording, ground_truth):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
@@ -96,40 +110,25 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": text, "is_user": True})
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
-    st.success("Medical consultation done")
+    # Calculate and display accuracy
+    accuracy = calculate_accuracy(ground_truth, st.session_state.history)
+    st.success(f"Medical consultation done. Accuracy: {accuracy:.2f}%")
 
+# Example usage
+if "history" not in st.session_state:
+    st.session_state.history = []
 
-if __name__ == "__main__":
-    # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
-    hide_menu_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        </style>
-    """
-    st.markdown(hide_menu_style, unsafe_allow_html=True)
+# Example ground truth data (you need to replace this with your actual ground truth data)
+ground_truth_data = {
+    "User1": "GroundTruthDiagnosis1",
+    "User2": "GroundTruthDiagnosis2",
+    # ... more entries ...
+}
 
-    col1, col2, col3 = st.columns(3)
+audio = audiorecorder("Start recording", "Recording in progress...")
 
-    with col1:
-        st.write(' ')
+if audio:
+    generate_answer(audio, ground_truth_data)
 
-    with col2:
-        st.image("./logo_.png", width=200)
-
-    with col3:
-        st.write(' ')
-
-    if "history" not in st.session_state:
-        st.session_state.history = []
-
-    st.title("Medical Diagnostic Assistant")
-
-    # Show Input
-    audio = audiorecorder("Start recording", "Recording in progress...")
-
-    if audio:
-        generate_answer(audio)
-
-        for i, chat in enumerate(st.session_state.history):  # Show historical consultation
-            st_message(**chat, key=str(i))
+    for i, chat in enumerate(st.session_state.history):  # Show historical consultation
+        st_message(**chat, key=str(i))
