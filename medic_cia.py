@@ -64,7 +64,6 @@ def diagnostic_medic(voice_text):
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
     
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
-
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
@@ -77,7 +76,6 @@ def format_diagnostic_results(results, model_name):
         return 'No diagnostic information available'
 
     return f'Top Diseases or Symptoms from {model_name}:\n{", ".join(formatted_results)}'
-
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
