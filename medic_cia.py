@@ -17,7 +17,7 @@ DIAGNOSTIC_MODELS = [
 
 headers = {"Authorization": "Bearer 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"}
 
-def recognize_speech(audio_file, confidence_threshold=0.7):
+def recognize_speech(audio_file, confidence_threshold=0.6):
     with open(audio_file, "rb") as f:
         data = f.read()
 
