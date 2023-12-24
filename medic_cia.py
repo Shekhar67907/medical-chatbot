@@ -78,35 +78,35 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{", ".join(formatted_results)}'
 
-def generate_answer(audio_recording):
-    st.spinner("Consultation in progress...")
 
-    # To save audio to a file:
-    audio_recording.export("audio.wav", format="wav")
+def recognize_speech(audio_file, confidence_threshold=0.6):
+    with open(audio_file, "rb") as f:
+        data = f.read()
 
-    # Voice recognition model
-    st.write("Audio file saved. Starting speech recognition...")
-    text = recognize_speech("audio.wav")
+    response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
 
-    if "recognition failed" in text.lower():
-        st.error("Voice recognition failed. Please try again.")
-        return
+    if response.status_code == 503:  # HTTP 503 Service Unavailable
+        estimated_time = response.json().get('estimated_time', 12.0)
+        st.warning(
+            f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
+        time.sleep(10)
+        response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)  # Retry after waiting
 
-    st.write(f"Speech recognition result: {text}")
+    if response.status_code != 200:
+        st.error(f"Speech recognition API error: {response.content}")
+        return "Speech recognition failed"
 
-    # Disease Prediction Model
-    st.write("Calling diagnostic models...")
-    diagnostic = diagnostic_medic(text)
-    st.write(f"Diagnostic result:\n{diagnostic}")
+    output = response.json()
+    confidence = output.get('confidence', 0.0)
+    
+    if confidence < confidence_threshold:
+        st.warning(f"Low confidence ({confidence:.2f}). Consider recording again for better results.")
+        return "Low confidence: Speech recognition failed"
 
-    # Add the statement for more detailed symptoms
-    st.write("Please provide more detailed symptoms for precise recognition.")
+    final_output = output.get('text', 'Speech recognition failed')
+    return final_output
 
-    # Save conversation
-    st.session_state.history.append({"message": text, "is_user": True})
-    st.session_state.history.append({"message": diagnostic, "is_user": False})
 
-    st.success("Medical consultation done")
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
