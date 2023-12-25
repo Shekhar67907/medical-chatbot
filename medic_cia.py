@@ -27,7 +27,7 @@ def recognize_speech(audio_file):
         estimated_time = response.json().get('estimated_time', 50.0)
         st.warning(
             f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
-        time.sleep(20)
+        time.sleep(estimated_time)
         return recognize_speech(audio_file)  # Retry after waiting
 
     if response.status_code != 200:
