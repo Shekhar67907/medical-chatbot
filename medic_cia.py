@@ -3,6 +3,7 @@ from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
+import json
 import time
 
 # Updated API details
@@ -23,8 +24,9 @@ def recognize_speech(audio_file):
     response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
 
     if response.status_code == 503:  # HTTP 503 Service Unavailable
-        estimated_time = response.json().get('estimated_time', 20.0)
-        st.warning(f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
+        estimated_time = response.json().get('estimated_time', 50.0)
+        st.warning(
+            f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
         time.sleep(20)
         return recognize_speech(audio_file)  # Retry after waiting
 
@@ -35,8 +37,7 @@ def recognize_speech(audio_file):
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
-
-def diagnostic_medic(voice_text, confidence_threshold=6):
+def diagnostic_medic(voice_text):
     model_results = []
 
     for model_info in DIAGNOSTIC_MODELS:
@@ -45,25 +46,22 @@ def diagnostic_medic(voice_text, confidence_threshold=6):
 
         try:
             results = response.json()[0][:5]
-            st.write(f"Model {model_info['name']} Response: {results}")  # Add this line for debugging
-
-            # Filter out results with confidence lower than the threshold
-            filtered_results = [result for result in results if result.get('score', 0) >= confidence_threshold]
-
-            model_results.append({"name": model_info["name"], "results": filtered_results})
+            model_results.append({"name": model_info["name"], "results": results})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
+
     if not model_results:
         return 'No diagnostic information available'
 
     # Compare results based on confidentiality score and choose the model with the highest score
-    best_model_result = max(model_results, key=lambda x: max([result.get('score', 0) for result in x['results']], default=0.0))
+    best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
     
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
+
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
-    sorted_results = sorted(results, key=lambda x: x.get('score', 0), reverse=True)
+    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
     # Extract the names of the top 2 diseases or symptoms
     top_results = sorted_results[:2]
@@ -92,7 +90,7 @@ def generate_answer(audio_recording):
 
     # Disease Prediction Model
     st.write("Calling diagnostic models...")
-    diagnostic = diagnostic_medic(text, confidence_threshold=6)
+    diagnostic = diagnostic_medic(text)
     st.write(f"Diagnostic result:\n{diagnostic}")
 
     # Add the statement for more detailed symptoms
@@ -103,6 +101,7 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
