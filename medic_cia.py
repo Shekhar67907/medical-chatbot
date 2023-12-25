@@ -6,8 +6,8 @@ from audiorecorder import audiorecorder
 import json
 import time
 
-# Updated API details
-API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
+API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/facebook/wav2vec2-base-960h"
+headers = {"Authorization": "Bearer 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"}
 
 # List of diagnostic models with their respective API URLs
 DIAGNOSTIC_MODELS = [
@@ -16,7 +16,6 @@ DIAGNOSTIC_MODELS = [
 ]
 
 headers = {"Authorization": "Bearer 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"}
-
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
         data = f.read()
