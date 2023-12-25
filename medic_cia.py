@@ -45,14 +45,14 @@ def diagnostic_medic(voice_text, confidence_threshold=6):
 
         try:
             results = response.json()[0][:5]
-            
+            st.write(f"Model {model_info['name']} Response: {results}")  # Add this line for debugging
+
             # Filter out results with confidence lower than the threshold
             filtered_results = [result for result in results if result.get('score', 0) >= confidence_threshold]
-            
+
             model_results.append({"name": model_info["name"], "results": filtered_results})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
-
     if not model_results:
         return 'No diagnostic information available'
 
