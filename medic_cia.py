@@ -5,6 +5,7 @@ from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
 import time
+import speech_recognition as sr  # Import the speech_recognition library
 
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
@@ -18,25 +19,22 @@ DIAGNOSTIC_MODELS = [
 headers = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio_file):
-    with open(audio_file, "rb") as f:
-        data = f.read()
+    recognizer = sr.Recognizer()
 
-    response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
+    with sr.AudioFile(audio_file) as source:
+        audio_data = recognizer.record(source)
 
-    if response.status_code == 503:  # HTTP 503 Service Unavailable
-        estimated_time = response.json().get('estimated_time', 50.0)
-        st.warning(
-            f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
-        time.sleep(estimated_time)
-        return recognize_speech(audio_file)  # Retry after waiting
-
-    if response.status_code != 200:
-        st.error(f"Speech recognition API error: {response.content}")
+    try:
+        # Use Google Web Speech API for recognition
+        text = recognizer.recognize_google(audio_data)
+        return text
+    except sr.UnknownValueError:
+        st.warning("Speech recognition could not understand the audio. Please try again.")
         return "Speech recognition failed"
-
-    output = response.json()
-    final_output = output.get('text', 'Speech recognition failed')
-    return final_output
+    except sr.RequestError as e:
+        st.error(f"Could not request results from Google Web Speech API; {e}")
+        return "Speech recognition failed"
+        
 def diagnostic_medic(voice_text):
     model_results = []
 
