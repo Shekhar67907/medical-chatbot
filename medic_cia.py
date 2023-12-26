@@ -47,6 +47,7 @@ def diagnostic_medic(voice_text, confidence_threshold=6):
 
         try:
             results = response.json()[0][:5]
+            print(f"Results for {model_info['name']}: {results}")
             model_results.append({"name": model_info["name"], "results": results})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
@@ -56,6 +57,7 @@ def diagnostic_medic(voice_text, confidence_threshold=6):
 
     # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
+    print(f"Best model result: {best_model_result}")
     
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"], confidence_threshold)
 
