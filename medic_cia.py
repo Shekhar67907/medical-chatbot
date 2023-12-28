@@ -37,6 +37,7 @@ def recognize_speech(audio_file):
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
+
 def diagnostic_medic(voice_text):
     model_results = []
 
@@ -57,7 +58,6 @@ def diagnostic_medic(voice_text):
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
     
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
-
 
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
@@ -101,7 +101,6 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
-
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
