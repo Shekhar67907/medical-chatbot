@@ -9,3 +9,4 @@ ffmpeg-python
 google-cloud-speech==2.9.0
 pydub==0.25.1
 SpeechRecognition==3.8.1
+os
