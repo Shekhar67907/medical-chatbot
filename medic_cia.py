@@ -37,8 +37,7 @@ def recognize_speech(audio_file):
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
-
-def diagnostic_medic(voice_text, confidence_threshold=6):
+def diagnostic_medic(voice_text):
     model_results = []
 
     for model_info in DIAGNOSTIC_MODELS:
@@ -47,7 +46,6 @@ def diagnostic_medic(voice_text, confidence_threshold=6):
 
         try:
             results = response.json()[0][:5]
-            print(f"Results for {model_info['name']}: {results}")
             model_results.append({"name": model_info["name"], "results": results})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
@@ -57,19 +55,17 @@ def diagnostic_medic(voice_text, confidence_threshold=6):
 
     # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
-    print(f"Best model result: {best_model_result}")
     
-    return format_diagnostic_results(best_model_result["results"], best_model_result["name"], confidence_threshold)
+    return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
-def format_diagnostic_results(results, model_name, confidence_threshold=6):
+
+def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    # Filter results based on confidence threshold
-    filtered_results = [result for result in sorted_results if result['score'] >= confidence_threshold]
-
-    # Extract the names of the top diseases or symptoms
-    formatted_results = [result['label'] for result in filtered_results]
+    # Extract the names of the top 2 diseases or symptoms
+    top_results = sorted_results[:2]
+    formatted_results = [result['label'] for result in top_results]
 
     if not formatted_results:
         return 'No diagnostic information available'
@@ -105,6 +101,7 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
