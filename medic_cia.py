@@ -80,13 +80,14 @@ def preprocess_audio(audio_file):
     # Load audio file
     audio = AudioSegment.from_file(audio_file)
 
-    # Reduce noise using low_pass_filter
-    audio = low_pass_filter(audio)
+    # Reduce noise using low_pass_filter with a cutoff frequency of 3000 Hz (you can adjust this value)
+    audio = low_pass_filter(audio, 3000)
 
     # Normalize amplitude
     audio = normalize(audio)
 
     return audio
+
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
