@@ -5,6 +5,7 @@ import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
+import os
 import time
 
 # Updated API details
@@ -19,11 +20,13 @@ DIAGNOSTIC_MODELS = [
 headers = {"Authorization": "Bearer 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"}
 
 def recognize_speech(audio):
-    # Convert AudioSegment to raw audio data
-    audio_data = audio.raw_data
-    sample_width = audio.sample_width
-    frame_rate = audio.frame_rate
-    channels = audio.channels
+    # Save AudioSegment to a temporary file
+    temp_audio_file = "temp_audio.wav"
+    audio.export(temp_audio_file, format="wav")
+
+    # Read the temporary file as binary data
+    with open(temp_audio_file, "rb") as f:
+        audio_data = f.read()
 
     # Make a bytes-like object
     audio_bytes = bytes(audio_data)
@@ -32,7 +35,6 @@ def recognize_speech(audio):
         API_URL_RECOGNITION,
         headers=headers,
         data=audio_bytes,
-        params={"sample_width": sample_width, "frame_rate": frame_rate, "channels": channels},
     )
 
     if response.status_code == 503:  # HTTP 503 Service Unavailable
@@ -48,6 +50,10 @@ def recognize_speech(audio):
 
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
+
+    # Clean up temporary file
+    os.remove(temp_audio_file)
+
     return final_output
 
 
