@@ -18,18 +18,29 @@ DIAGNOSTIC_MODELS = [
 
 headers = {"Authorization": "Bearer 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"}
 
-def recognize_speech(audio_file):
-    with open(audio_file, "rb") as f:
-        data = f.read()
+def recognize_speech(audio):
+    # Convert AudioSegment to raw audio data
+    audio_data = audio.raw_data
+    sample_width = audio.sample_width
+    frame_rate = audio.frame_rate
+    channels = audio.channels
 
-    response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
+    # Make a bytes-like object
+    audio_bytes = bytes(audio_data)
+
+    response = requests.post(
+        API_URL_RECOGNITION,
+        headers=headers,
+        data=audio_bytes,
+        params={"sample_width": sample_width, "frame_rate": frame_rate, "channels": channels},
+    )
 
     if response.status_code == 503:  # HTTP 503 Service Unavailable
         estimated_time = response.json().get('estimated_time', 50.0)
         st.warning(
             f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
         time.sleep(20)
-        return recognize_speech(audio_file)  # Retry after waiting
+        return recognize_speech(audio)  # Retry after waiting
 
     if response.status_code != 200:
         st.error(f"Speech recognition API error: {response.content}")
@@ -38,6 +49,7 @@ def recognize_speech(audio_file):
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
+
 
 def diagnostic_medic(voice_text):
     model_results = []
@@ -152,7 +164,7 @@ if __name__ == "__main__":
     audio = audiorecorder("Start recording", "Recording in progress...")
 
     if audio:
-        generate_answer(audio)
+        generate_answer(preprocessed_audio)
 
         for i, chat in enumerate(st.session_state.history):  # Show historical consultation
             st_message(**chat, key=str(i))
