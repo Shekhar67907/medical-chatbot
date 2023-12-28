@@ -1,5 +1,6 @@
 import requests
 from pydub import AudioSegment
+from pydub.effects import normalize, reduce_noise
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
@@ -75,6 +76,17 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
+def preprocess_audio(audio_file):
+    # Load audio file
+    audio = AudioSegment.from_file(audio_file)
+
+    # Reduce noise
+    audio = reduce_noise(audio)
+
+    # Normalize amplitude
+    audio = normalize(audio)
+
+    return audio
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -82,9 +94,12 @@ def generate_answer(audio_recording):
     # To save audio to a file:
     audio_recording.export("audio.wav", format="wav")
 
+    # Preprocess audio
+    preprocessed_audio = preprocess_audio("audio.wav")
+
     # Voice recognition model
     st.write("Audio file saved. Starting speech recognition...")
-    text = recognize_speech("audio.wav")
+    text = recognize_speech(preprocessed_audio)
 
     if "recognition failed" in text.lower():
         st.error("Voice recognition failed. Please try again.")
