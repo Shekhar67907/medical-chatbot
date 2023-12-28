@@ -1,12 +1,10 @@
 import requests
 from pydub import AudioSegment
-from pydub.effects import normalize, low_pass_filter
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
 import time
-import os
 
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
@@ -19,42 +17,19 @@ DIAGNOSTIC_MODELS = [
 
 headers = {"Authorization": "Bearer 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"}
 
-def preprocess_audio(audio_file):
-    # Load audio file
-    audio = AudioSegment.from_file(audio_file)
 
-    # Reduce noise using low_pass_filter with a cutoff frequency of 3000 Hz (you can adjust this value)
-    audio = low_pass_filter(audio, 3000)
+def recognize_speech(audio_file):
+    with open(audio_file, "rb") as f:
+        data = f.read()
 
-    # Normalize amplitude
-    audio = normalize(audio)
-
-    return audio
-
-def recognize_speech(audio):
-    # Save AudioSegment to a temporary file
-    temp_audio_file = "temp_audio.wav"
-    audio.export(temp_audio_file, format="wav")
-
-    # Read the temporary file as binary data
-    with open(temp_audio_file, "rb") as f:
-        audio_data = f.read()
-
-    # Make a bytes-like object
-    audio_bytes = bytes(audio_data)
-
-    response = requests.post(
-        API_URL_RECOGNITION,
-        headers=headers,
-        data=audio_bytes,
-    )
+    response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
 
     if response.status_code == 503:  # HTTP 503 Service Unavailable
         estimated_time = response.json().get('estimated_time', 50.0)
         st.warning(
             f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
         time.sleep(20)
-        return recognize_speech(audio)  # Retry after waiting
+        return recognize_speech(audio_file)  # Retry after waiting
 
     if response.status_code != 200:
         st.error(f"Speech recognition API error: {response.content}")
@@ -62,11 +37,8 @@ def recognize_speech(audio):
 
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
-
-    # Clean up temporary file
-    os.remove(temp_audio_file)
-
     return final_output
+
 
 def diagnostic_medic(voice_text):
     model_results = []
@@ -86,7 +58,7 @@ def diagnostic_medic(voice_text):
 
     # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
-    
+
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
 
@@ -106,18 +78,16 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
+
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
     # To save audio to a file:
     audio_recording.export("audio.wav", format="wav")
 
-    # Preprocess audio
-    preprocessed_audio = preprocess_audio("audio.wav")
-
     # Voice recognition model
     st.write("Audio file saved. Starting speech recognition...")
-    text = recognize_speech(preprocessed_audio)
+    text = recognize_speech("audio.wav")
 
     if "recognition failed" in text.lower():
         st.error("Voice recognition failed. Please try again.")
@@ -139,7 +109,6 @@ def generate_answer(audio_recording):
 
     st.success("Medical consultation done")
 
-# ... (rest of your code remains the same)
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
@@ -171,9 +140,7 @@ if __name__ == "__main__":
     audio = audiorecorder("Start recording", "Recording in progress...")
 
     if audio:
-         print("Calling generate_answer...")
-         generate_answer(audio)
-         print("generate_answer called")
+        generate_answer(audio)
 
-         for i, chat in enumerate(st.session_state.history):  # Show historical consultation
-             st_message(**chat, key=str(i))
+        for i, chat in enumerate(st.session_state.history):  # Show historical consultation
+            st_message(**chat, key=str(i))
