@@ -1,6 +1,6 @@
 import requests
 from pydub import AudioSegment
-from pydub.effects import normalize, reduce_noise
+from pydub.effects import normalize, low_pass_filter  # Change here
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
@@ -80,8 +80,8 @@ def preprocess_audio(audio_file):
     # Load audio file
     audio = AudioSegment.from_file(audio_file)
 
-    # Reduce noise
-    audio = reduce_noise(audio)
+    # Reduce noise using low_pass_filter
+    audio = low_pass_filter(audio)
 
     # Normalize amplitude
     audio = normalize(audio)
