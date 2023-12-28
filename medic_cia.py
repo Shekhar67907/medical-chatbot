@@ -139,9 +139,9 @@ if __name__ == "__main__":
     audio = audiorecorder("Start recording", "Recording in progress...")
 
     if audio:
-        print("Calling generate_answer...")
-        generate_answer(audio)
-        print("generate_answer called")
+         print("Calling generate_answer...")
+         generate_answer(audio)
+         print("generate_answer called")
 
-        for i, chat in enumerate(st.session_state.history):  # Show historical consultation
-            st_message(**chat, key=str(i))
+         for i, chat in enumerate(st.session_state.history):  # Show historical consultation
+             st_message(**chat, key=str(i))
