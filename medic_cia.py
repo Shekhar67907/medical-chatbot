@@ -25,7 +25,7 @@ def recognize_speech(audio_file):
     response = requests.post(API_URL_RECOGNITION, headers=headers, data=data)
 
     if response.status_code == 503:  # HTTP 503 Service Unavailable
-        estimated_time = response.json().get('estimated_time', 50.0)
+        estimated_time = response.json().get('estimated_time', 20.0)
         st.warning(
             f"Model is currently loading. Please wait for approximately {estimated_time:.2f} seconds and try again.")
         time.sleep(20)
