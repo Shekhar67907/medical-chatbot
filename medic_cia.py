@@ -92,6 +92,8 @@ def format_diagnostic_results(results, model_name):
     formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
+
+
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -115,6 +117,9 @@ def generate_answer(audio_recording):
     # Check if the response is a list and get the first element
     if isinstance(diagnostic_result, list) and diagnostic_result:
         diagnostic_result = diagnostic_result[0]
+
+    # Print the diagnostic result for inspection
+    st.write("Diagnostic Result:", diagnostic_result)
 
     # Extract the predicted disease
     predicted_disease = diagnostic_result.get('output', 'Unknown').lower() if isinstance(diagnostic_result, dict) else 'Unknown'
@@ -140,6 +145,7 @@ def generate_answer(audio_recording):
         st.session_state.history.append({"message": f"- {precaution}", "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     hide_menu_style = """
