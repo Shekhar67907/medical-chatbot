@@ -98,7 +98,7 @@ def generate_answer(audio_recording):
 
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
-    st.session_state.history.append({"message": diagnostic, "is_user": False})
+    st.session_state.history.append({"message": diagnostic["label"], "score": diagnostic["score"], "is_user": False})
 
     st.success("Medical consultation done")
 
@@ -139,4 +139,4 @@ if __name__ == "__main__":
             if chat["is_user"]:
                 st.write(f"User: {chat['message']}")
             else:
-                st.write(f"{chat['message']} (Confidence: {chat['confidence']:.2%})")
+                st.write(f"{chat['message']} (Confidence: {chat['score']:.2%})")
