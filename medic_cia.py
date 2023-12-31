@@ -102,6 +102,7 @@ def generate_answer(audio_recording):
 
     st.success("Medical consultation done")
 
+# ...
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
@@ -139,5 +140,5 @@ if __name__ == "__main__":
             if chat["is_user"]:
                 st.write(f"User: {chat['message']}")
             else:
+                # Use 'score' key to access the confidence score
                 st.write(f"{chat['message']} (Confidence: {chat['score']:.2%})")
-
