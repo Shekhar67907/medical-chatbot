@@ -106,8 +106,11 @@ def generate_answer(audio_recording):
     symptoms_payload = {"inputs": text}
     precautions_output = query_precautions(symptoms_payload)
 
-    precautions = precautions_output.get("precautions", "Precautions not available")
-    st.write(f"Precautions based on symptoms:\n{precautions}")
+    if isinstance(precautions_output, list) and precautions_output:
+        precautions = precautions_output[0].get("precautions", "Precautions not available")
+        st.write(f"Precautions based on symptoms:\n{precautions}")
+    else:
+        st.warning("Unexpected response format from precautions model.")
 
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
@@ -118,6 +121,7 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": f"Precautions: {precautions}", "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
