@@ -54,12 +54,12 @@ def diagnostic_medic(voice_text):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
 
     if not model_results:
-        return 'No diagnostic information available'
+        return {'label': 'No diagnostic information available', 'score': 0.0}
 
     # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: x['score'], default=None)
 
-    return format_diagnostic_results(best_model_result, best_model_result["name"])
+    return best_model_result
 
 
 def format_diagnostic_results(result, model_name):
@@ -91,14 +91,14 @@ def generate_answer(audio_recording):
     # Disease Prediction Model
     st.write("Calling diagnostic models...")
     diagnostic = diagnostic_medic(text)
-    st.write(f"Diagnostic result:\n{diagnostic}")
+    st.write(f"Diagnostic result:\n{diagnostic['label']} (Confidence: {diagnostic['score']:.2%})")
 
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
 
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
-    st.session_state.history.append({"message": diagnostic["label"], "score": diagnostic["score"], "is_user": False})
+    st.session_state.history.append({"message": diagnostic['label'], "score": diagnostic['score'], "is_user": False})
 
     st.success("Medical consultation done")
 
@@ -140,3 +140,4 @@ if __name__ == "__main__":
                 st.write(f"User: {chat['message']}")
             else:
                 st.write(f"{chat['message']} (Confidence: {chat['score']:.2%})")
+
