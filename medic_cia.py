@@ -140,5 +140,7 @@ if __name__ == "__main__":
             if chat["is_user"]:
                 st.write(f"User: {chat['message']}")
             else:
-                # Use 'score' key to access the confidence score
-                st.write(f"{chat['message']} (Confidence: {chat['score']:.2%})")
+                # Check if 'score' key is present in the dictionary
+                confidence_str = f" (Confidence: {chat['score']:.2%})" if 'score' in chat else ""
+                st.write(f"{chat['message']}{confidence_str}")
+
