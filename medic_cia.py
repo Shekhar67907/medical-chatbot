@@ -9,11 +9,10 @@ import time
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
 
-# List of diagnostic models with their respective API URLs
-DIAGNOSTIC_MODELS = [
-    {"name": "Model 1", "api_url": "https://api-inference.huggingface.co/models/abhirajeshbhai/symptom-2-disease-net"},
-    {"name": "Model 2", "api_url": "https://api-inference.huggingface.co/models/DinaSalama/symptom_to_disease_distb"},
-]
+# New model API details
+NEW_MODEL_API_URL = "https://api-inference.huggingface.co/models/shanover/medbot_godel_v3"
+NEW_MODEL_INFO = {"name": "New Model", "api_url": NEW_MODEL_API_URL}
+DIAGNOSTIC_MODELS = [NEW_MODEL_INFO]
 
 headers = {"Authorization": "Bearer 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"}
 
