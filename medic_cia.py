@@ -79,6 +79,7 @@ def format_diagnostic_results(results, model_name):
 def query_precautions(payload):
     response = requests.post(API_URL_PRECAUTIONS, headers=headers, json=payload)
     return response.json()
+
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -102,14 +103,18 @@ def generate_answer(audio_recording):
 
     # New Model for Precautions
     st.write("Calling precautions model...")
-    symptoms_payload = {"inputs": text}
+
+    # Construct a sentence describing symptoms
+    symptoms_sentence = f"I am feeling {text}"  # Assuming 'text' contains the recognized symptoms
+
+    symptoms_payload = {"inputs": symptoms_sentence}
     precautions_output = query_precautions(symptoms_payload)
 
     print("Precautions API Response:", precautions_output)  # Debug print
 
     if isinstance(precautions_output, list) and precautions_output:
-        precautions = precautions_output[0].get("precautions", "Precautions not available")
-        st.write(f"Precautions based on symptoms:\n{precautions}")
+        precautions_sentence = precautions_output[0].get("precautions", "Precautions not available")
+        st.write(f"Precautions based on symptoms: {symptoms_sentence}. {precautions_sentence}")
     else:
         st.warning("Unexpected response format from precautions model.")
 
@@ -119,12 +124,9 @@ def generate_answer(audio_recording):
     # Save conversation
     st.session_state.history.append({"message": text, "is_user": True})
     st.session_state.history.append({"message": diagnostic, "is_user": False})
-    st.session_state.history.append({"message": f"Precautions: {precautions}", "is_user": False})
+    st.session_state.history.append({"message": f"Precautions: {symptoms_sentence}. {precautions_sentence}", "is_user": False})
 
     st.success("Medical consultation done")
-
-
-
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
