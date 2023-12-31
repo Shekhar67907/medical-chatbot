@@ -47,8 +47,8 @@ def diagnostic_medic(voice_text):
         response = requests.post(model_info["api_url"], headers=headers, json=payload)
 
         try:
-            results = response.json()[0][:5]
-            model_results.append({"name": model_info["name"], "results": results})
+            generated_text = response.json()[0]['generated_text']
+            model_results.append({"name": model_info["name"], "results": [{'label': generated_text, 'score': 1.0}]})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
 
