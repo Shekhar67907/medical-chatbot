@@ -104,8 +104,9 @@ def generate_answer(audio_recording):
     # New Model for Precautions
     st.write("Calling precautions model...")
 
-    # Construct a sentence describing symptoms
-    symptoms_sentence = f"I am feeling {text}"  # Assuming 'text' contains the recognized symptoms
+    # Get user input for symptoms
+    user_symptoms = st.text_input("Describe your symptoms:")
+    symptoms_sentence = f"I am feeling {user_symptoms}"
 
     symptoms_payload = {"inputs": symptoms_sentence}
     precautions_output = query_precautions(symptoms_payload)
@@ -127,6 +128,7 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": f"Precautions: {symptoms_sentence}. {precautions_sentence}", "is_user": False})
 
     st.success("Medical consultation done")
+
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
