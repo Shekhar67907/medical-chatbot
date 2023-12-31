@@ -101,17 +101,19 @@ def generate_answer(audio_recording):
     diagnostic = diagnostic_medic(text)
     st.write(f"Diagnostic result:\n{diagnostic}")
 
-    # New Model for Precautions
-    st.write("Calling precautions model...")
-    symptoms_payload = {"inputs": text}
-    precautions_output = query_precautions(symptoms_payload)
+# New Model for Precautions
+st.write("Calling precautions model...")
+symptoms_payload = {"inputs": text}
+precautions_output = query_precautions(symptoms_payload)
 
-    if isinstance(precautions_output, list) and precautions_output:
-        precautions = precautions_output[0].get("precautions", "Precautions not available")
-        st.write(f"Precautions based on symptoms:\n{precautions}")
-    else:
-        st.warning("Unexpected response format from precautions model.")
+print("Precautions API Response:", precautions_output)  # Debug print
 
+if isinstance(precautions_output, list) and precautions_output:
+    precautions = precautions_output[0].get("precautions", "Precautions not available")
+    st.write(f"Precautions based on symptoms:\n{precautions}")
+else:
+    st.warning("Unexpected response format from precautions model.")
+    
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
 
