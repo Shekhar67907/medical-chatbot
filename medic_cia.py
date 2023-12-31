@@ -48,7 +48,8 @@ def diagnostic_medic(voice_text):
 
         try:
             generated_text = response.json()[0]['generated_text']
-            model_results.append({"name": model_info["name"], "results": [{'label': generated_text, 'score': 1.0}]})
+            confidence_score = response.json()[0]['score']
+            model_results.append({"name": model_info["name"], "label": generated_text, "score": confidence_score})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
 
@@ -56,24 +57,17 @@ def diagnostic_medic(voice_text):
         return 'No diagnostic information available'
 
     # Compare results based on confidentiality score and choose the model with the highest score
-    best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
+    best_model_result = max(model_results, key=lambda x: x['score'], default=None)
 
-    return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+    return format_diagnostic_results(best_model_result, best_model_result["name"])
 
 
-def format_diagnostic_results(results, model_name):
-    # Sort the results based on the score in descending order
-    sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
-
-    # Extract the names and scores of the top results
-    top_results = sorted_results[:2]
-    formatted_results = [(result['label'], result['score']) for result in top_results]
-
-    if not formatted_results:
+def format_diagnostic_results(result, model_name):
+    if not result:
         return 'No diagnostic information available'
 
     # Create a string with disease names and confidence scores
-    formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
+    formatted_results_str = f'{result["label"]} ({result["score"]:.2%})'
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
@@ -142,4 +136,7 @@ if __name__ == "__main__":
         generate_answer(audio)
 
         for i, chat in enumerate(st.session_state.history):  # Show historical consultation
-            st_message(**chat, key=str(i))
+            if chat["is_user"]:
+                st.write(f"User: {chat['message']}")
+            else:
+                st.write(f"{chat['message']} (Confidence: {chat['confidence']:.2%})")
