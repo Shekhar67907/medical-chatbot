@@ -2,6 +2,8 @@ import requests
 import streamlit as st
 from audiorecorder import audiorecorder
 from streamlit_chat import message as st_message
+import time
+
 
 
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
