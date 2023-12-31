@@ -79,7 +79,6 @@ def format_diagnostic_results(results, model_name):
 def query_precautions(payload):
     response = requests.post(API_URL_PRECAUTIONS, headers=headers, json=payload)
     return response.json()
-
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -101,19 +100,19 @@ def generate_answer(audio_recording):
     diagnostic = diagnostic_medic(text)
     st.write(f"Diagnostic result:\n{diagnostic}")
 
-# New Model for Precautions
-st.write("Calling precautions model...")
-symptoms_payload = {"inputs": text}
-precautions_output = query_precautions(symptoms_payload)
+    # New Model for Precautions
+    st.write("Calling precautions model...")
+    symptoms_payload = {"inputs": text}
+    precautions_output = query_precautions(symptoms_payload)
 
-print("Precautions API Response:", precautions_output)  # Debug print
+    print("Precautions API Response:", precautions_output)  # Debug print
 
-if isinstance(precautions_output, list) and precautions_output:
-    precautions = precautions_output[0].get("precautions", "Precautions not available")
-    st.write(f"Precautions based on symptoms:\n{precautions}")
-else:
-    st.warning("Unexpected response format from precautions model.")
-    
+    if isinstance(precautions_output, list) and precautions_output:
+        precautions = precautions_output[0].get("precautions", "Precautions not available")
+        st.write(f"Precautions based on symptoms:\n{precautions}")
+    else:
+        st.warning("Unexpected response format from precautions model.")
+
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
 
@@ -123,6 +122,8 @@ else:
     st.session_state.history.append({"message": f"Precautions: {precautions}", "is_user": False})
 
     st.success("Medical consultation done")
+
+
 
 
 if __name__ == "__main__":
