@@ -75,14 +75,7 @@ def format_diagnostic_results(results, model_name):
     # Create a string with disease names and confidence scores
     formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
 
-    # Use st.text_area to display the full text without truncation
-    st.text_area(f'Top Diseases or Symptoms from {model_name}:', formatted_results_str, height=200)
-
-    # Alternatively, you can use st.write
-    # st.write(f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}')
-
-    return formatted_results_str
-
+    return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
 
 def generate_answer(audio_recording):
