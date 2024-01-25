@@ -16,6 +16,10 @@ DIAGNOSTIC_MODELS = [NEW_MODEL_INFO]
 
 headers = {"Authorization": "Bearer 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"}
 
+# Set Streamlit option to display the full output without truncation
+st.set_option('deprecation.showfileUploaderEncoding', False)
+st.set_option('deprecation.showPyplotGlobalUse', False)
+st.set_option('max_elements', None)
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
@@ -65,11 +69,15 @@ def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    if not sorted_results:
+    # Extract the names and scores of the top results
+    top_results = sorted_results[:2]
+    formatted_results = [(result['label'], result['score']) for result in top_results]
+
+    if not formatted_results:
         return 'No diagnostic information available'
 
-    # Create a string with full details of disease names and confidence scores
-    formatted_results_str = '\n'.join([f'{result["label"]} ({result["score"]:.2%})' for result in sorted_results])
+    # Create a string with disease names and confidence scores
+    formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
