@@ -36,13 +36,6 @@ def recognize_speech(audio_file):
 
     output = response.json()
     final_output = output.get('text', 'Speech recognition failed')
-
-    # Use st.text_area to display the full text without truncation
-    st.text_area("Speech recognition result", final_output, height=200)
-
-    # Alternatively, you can use st.write
-    # st.write("Speech recognition result:", final_output)
-
     return final_output
 
 
@@ -65,14 +58,7 @@ def diagnostic_medic(voice_text):
     # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
 
-    # Use st.text_area to display the full text without truncation
-    st.text_area(f"Top Diseases or Symptoms from {best_model_result['name']}", format_diagnostic_results(best_model_result["results"], best_model_result["name"]), height=200)
-
-    # Alternatively, you can use st.write
-    # st.write(f"Top Diseases or Symptoms from {best_model_result['name']}:", format_diagnostic_results(best_model_result["results"], best_model_result["name"]))
-
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
-
 
 
 def format_diagnostic_results(results, model_name):
@@ -91,6 +77,7 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
+
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -105,17 +92,12 @@ def generate_answer(audio_recording):
         st.error("Voice recognition failed. Please try again.")
         return
 
-    st.write("Speech recognition result:")
-    
-    # Use st.text_area with a unique key to display the full text without truncation
-    st.text_area("Speech recognition result", text, key="speech_result", height=200)
+    st.write(f"Speech recognition result: {text}")
 
     # Disease Prediction Model
     st.write("Calling diagnostic models...")
     diagnostic = diagnostic_medic(text)
-    
-    # Use st.text_area with a unique key to display the full text without truncation
-    st.text_area("Diagnostic result", diagnostic, key="diagnostic_result", height=200)
+    st.write(f"Diagnostic result:\n{diagnostic}")
 
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
@@ -125,9 +107,6 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
-
-
-
 
 
 if __name__ == "__main__":
