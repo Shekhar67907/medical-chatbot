@@ -16,10 +16,6 @@ DIAGNOSTIC_MODELS = [NEW_MODEL_INFO]
 
 headers = {"Authorization": "Bearer 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"}
 
-# Set Streamlit option to display the full output without truncation
-st.set_config_option('deprecation.showfileUploaderEncoding', False)
-st.set_config_option('deprecation.showPyplotGlobalUse', False)
-st.set_max_elements(None)
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
