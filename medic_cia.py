@@ -98,6 +98,8 @@ def generate_answer(audio_recording):
     st.write("Calling diagnostic models...")
     diagnostic = diagnostic_medic(text)
     
+    # Display the full diagnostic result
+    st.write(f"Diagnostic result: {diagnostic}")
 
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
