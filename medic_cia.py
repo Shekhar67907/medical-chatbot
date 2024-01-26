@@ -61,8 +61,6 @@ def diagnostic_medic(voice_text):
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
 
-# ... (previous code remains unchanged)
-
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
@@ -74,8 +72,6 @@ def format_diagnostic_results(results, model_name):
     formatted_results_str = '\n'.join([f'{result["label"]} (Score: {result["score"]})' for result in sorted_results])
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}\n'
-
-# ... (remaining code remains unchanged)
 
 
 
