@@ -73,9 +73,9 @@ def format_diagnostic_results(results, model_name):
         return 'No diagnostic information available'
 
     # Create a string with disease names and confidence scores
-    formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
+    formatted_results_str = ', '.join([f'{label} ({score:.2f})' for label, score in formatted_results])
 
-    return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
+    return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}\n'
 
 
 def generate_answer(audio_recording):
