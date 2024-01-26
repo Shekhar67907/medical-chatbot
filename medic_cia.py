@@ -47,7 +47,8 @@ def diagnostic_medic(voice_text):
         response = requests.post(model_info["api_url"], headers=headers, json=payload)
 
         try:
-            generated_text = response.json()[0]['generated_text']
+            choices = response.json()[0]['choices']
+            generated_text = choices[0]['text']
             model_results.append({"name": model_info["name"], "results": [{'label': generated_text, 'score': 1.0}]})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
@@ -58,10 +59,12 @@ def diagnostic_medic(voice_text):
     if not model_results:
         return 'No diagnostic information available'
 
-    # Compare results based on confidentiality score and choose the model with the highest score
+    # Extract the complete generated text from the API response
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
+    complete_generated_text = best_model_result["results"][0]['label']
 
-    return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+    return format_diagnostic_results([{'label': complete_generated_text, 'score': 1.0}], best_model_result["name"])
+
     
 def diagnostic_medic(voice_text):
     model_results = []
