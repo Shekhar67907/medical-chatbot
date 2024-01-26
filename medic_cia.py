@@ -62,6 +62,7 @@ def diagnostic_medic(voice_text):
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
 
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+    
 def diagnostic_medic(voice_text):
     model_results = []
 
@@ -81,10 +82,12 @@ def diagnostic_medic(voice_text):
     if not model_results:
         return 'No diagnostic information available'
 
-    # Compare results based on confidentiality score and choose the model with the highest score
+    # Extract the complete generated text from the API response
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
+    complete_generated_text = best_model_result["results"][0]['label']
 
-    return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+    return format_diagnostic_results([{'label': complete_generated_text, 'score': 1.0}], best_model_result["name"])
+
 
 
 
