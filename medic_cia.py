@@ -77,6 +77,8 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}\n'
 
+
+
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
 
@@ -106,8 +108,10 @@ def generate_answer(audio_recording):
 
     st.success("Medical consultation done")
 
-    # Display the full diagnostic result in a text area
-    st.text_area("Full Diagnostic Result", diagnostic, height=200)
+    # Display the full diagnostic result in the chatbox
+    st_message("Full Diagnostic Result", diagnostic)
+
+
 
 
 if __name__ == "__main__":
