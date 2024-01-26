@@ -72,8 +72,8 @@ def format_diagnostic_results(results, model_name):
     if not formatted_results:
         return 'No diagnostic information available'
 
-    # Create a string with disease names and confidence scores
-    formatted_results_str = ', '.join([f'{label} ({score:.2f})' for label, score in formatted_results])
+    # Create a string with disease names
+    formatted_results_str = ', '.join([f'{label}' for label, score in formatted_results])
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}\n'
 
