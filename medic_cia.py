@@ -61,21 +61,22 @@ def diagnostic_medic(voice_text):
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
 
+# ... (previous code remains unchanged)
+
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    # Extract the names and scores of the top results
-    top_results = sorted_results[:2]
-    formatted_results = [(result['label'], result['score']) for result in top_results]
-
-    if not formatted_results:
+    if not sorted_results:
         return 'No diagnostic information available'
 
-    # Create a string with disease names
-    formatted_results_str = ', '.join([f'{label}' for label, score in formatted_results])
+    # Create a string with all information (label and score)
+    formatted_results_str = '\n'.join([f'{result["label"]} (Score: {result["score"]})' for result in sorted_results])
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}\n'
+
+# ... (remaining code remains unchanged)
+
 
 
 
