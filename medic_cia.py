@@ -52,6 +52,9 @@ def diagnostic_medic(voice_text):
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
 
+        # Print the raw API response for inspection
+        print(f"Raw API Response ({model_info['name']}): {response.text}")
+
     if not model_results:
         return 'No diagnostic information available'
 
@@ -59,6 +62,30 @@ def diagnostic_medic(voice_text):
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
 
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+def diagnostic_medic(voice_text):
+    model_results = []
+
+    for model_info in DIAGNOSTIC_MODELS:
+        payload = {"inputs": [voice_text]}
+        response = requests.post(model_info["api_url"], headers=headers, json=payload)
+
+        try:
+            generated_text = response.json()[0]['generated_text']
+            model_results.append({"name": model_info["name"], "results": [{'label': generated_text, 'score': 1.0}]})
+        except (KeyError, IndexError):
+            st.warning(f'Diagnostic information not available for {model_info["name"]}')
+
+        # Print the raw API response for inspection
+        print(f"Raw API Response ({model_info['name']}): {response.text}")
+
+    if not model_results:
+        return 'No diagnostic information available'
+
+    # Compare results based on confidentiality score and choose the model with the highest score
+    best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
+
+    return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
+
 
 
 def format_diagnostic_results(results, model_name):
