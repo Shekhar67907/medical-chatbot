@@ -47,68 +47,35 @@ def diagnostic_medic(voice_text):
         response = requests.post(model_info["api_url"], headers=headers, json=payload)
 
         try:
-            # Print the complete API response for inspection
-            print(f"Complete API Response ({model_info['name']}): {response.json()}")
-
-            # Extract the relevant information from the response
-            choices = response.json()[0]['choices']
-            generated_text = choices[0]['text']
-            model_results.append({"name": model_info["name"], "results": [{'label': generated_text, 'score': 1.0}]})
-        except (KeyError, IndexError):
-            st.warning(f'Diagnostic information not available for {model_info["name"]}')
-
-    if not model_results:
-        return 'No diagnostic information available'
-
-    # Extract the complete generated text from the API response
-    best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
-    complete_generated_text = best_model_result["results"][0]['label']
-
-    return format_diagnostic_results([{'label': complete_generated_text, 'score': 1.0}], best_model_result["name"])
-
-
-    
-def diagnostic_medic(voice_text):
-    model_results = []
-
-    for model_info in DIAGNOSTIC_MODELS:
-        payload = {"inputs": [voice_text]}
-        response = requests.post(model_info["api_url"], headers=headers, json=payload)
-
-        try:
             generated_text = response.json()[0]['generated_text']
             model_results.append({"name": model_info["name"], "results": [{'label': generated_text, 'score': 1.0}]})
         except (KeyError, IndexError):
             st.warning(f'Diagnostic information not available for {model_info["name"]}')
 
-        # Print the raw API response for inspection
-        print(f"Raw API Response ({model_info['name']}): {response.text}")
-
     if not model_results:
         return 'No diagnostic information available'
 
-    # Extract the complete generated text from the API response
+    # Compare results based on confidentiality score and choose the model with the highest score
     best_model_result = max(model_results, key=lambda x: max([result['score'] for result in x['results']], default=0.0))
-    complete_generated_text = best_model_result["results"][0]['label']
 
-    return format_diagnostic_results([{'label': complete_generated_text, 'score': 1.0}], best_model_result["name"])
-
-
+    return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
 
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    if not sorted_results:
+    # Extract the names and scores of the top results
+    top_results = sorted_results[:2]
+    formatted_results = [(result['label'], result['score']) for result in top_results]
+
+    if not formatted_results:
         return 'No diagnostic information available'
 
-    # Create a string with all information (label and score)
-    formatted_results_str = '\n'.join([f'{result["label"]} (Score: {result["score"]})' for result in sorted_results])
+    # Create a string with disease names and confidence scores
+    formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
 
-    return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}\n'
-
-
+    return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
 
 def generate_answer(audio_recording):
@@ -130,6 +97,7 @@ def generate_answer(audio_recording):
     # Disease Prediction Model
     st.write("Calling diagnostic models...")
     diagnostic = diagnostic_medic(text)
+    st.write(f"Diagnostic result:\n{diagnostic}")
 
     # Add the statement for more detailed symptoms
     st.write("Please provide more detailed symptoms for precise recognition.")
@@ -139,11 +107,6 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
-
-    # Display the full diagnostic result in the chatbox
-    st_message("Full Diagnostic Result", diagnostic)
-
-
 
 
 if __name__ == "__main__":
