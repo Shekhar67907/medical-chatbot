@@ -14,7 +14,7 @@ NEW_MODEL_API_URL = "https://api-inference.huggingface.co/models/shanover/medbot
 NEW_MODEL_INFO = {"name": "New Model", "api_url": NEW_MODEL_API_URL}
 DIAGNOSTIC_MODELS = [NEW_MODEL_INFO]
 
-headers = {"Authorization": "Bearer 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"}
+headers = {"Authorization": "Bearer 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"}
 
 
 def recognize_speech(audio_file):
@@ -65,15 +65,15 @@ def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
 
-    # Extract the names and scores of the top results
+    # Extract the names of the top results
     top_results = sorted_results[:2]
-    formatted_results = [(result['label'], result['score']) for result in top_results]
+    formatted_results = [result['label'] for result in top_results]
 
     if not formatted_results:
         return 'No diagnostic information available'
 
-    # Create a string with disease names and confidence scores
-    formatted_results_str = ', '.join([f'{label} ({score:.2%})' for label, score in formatted_results])
+    # Create a string with disease names
+    formatted_results_str = ', '.join(formatted_results)
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
@@ -140,6 +140,5 @@ if __name__ == "__main__":
 
     if audio:
         generate_answer(audio)
-
-        for i, chat in enumerate(st.session_state.history):  # Show historical consultation
-            st_message(**chat, key=str(i))
+    for i, chat in enumerate(st.session_state.history):  
+        st_message(**chat, key=f"message_{i}")  # Utilize a prefix along with index for uniqueness
