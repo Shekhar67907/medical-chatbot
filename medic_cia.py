@@ -1,10 +1,11 @@
-import requests
-from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
 from audiorecorder import audiorecorder
 import json
 import time
+import requests
+from pydub import AudioSegment
+import folium
 
 # Updated API details
 API_URL_RECOGNITION = "https://api-inference.huggingface.co/models/jonatasgrosman/wav2vec2-large-xlsr-53-english"
@@ -15,7 +16,6 @@ NEW_MODEL_INFO = {"name": "New Model", "api_url": NEW_MODEL_API_URL}
 DIAGNOSTIC_MODELS = [NEW_MODEL_INFO]
 
 headers = {"Authorization": "Bearer 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"}
-
 
 def recognize_speech(audio_file):
     with open(audio_file, "rb") as f:
@@ -38,7 +38,6 @@ def recognize_speech(audio_file):
     final_output = output.get('text', 'Speech recognition failed')
     return final_output
 
-
 def diagnostic_medic(voice_text):
     model_results = []
 
@@ -60,7 +59,6 @@ def diagnostic_medic(voice_text):
 
     return format_diagnostic_results(best_model_result["results"], best_model_result["name"])
 
-
 def format_diagnostic_results(results, model_name):
     # Sort the results based on the score in descending order
     sorted_results = sorted(results, key=lambda x: x['score'], reverse=True)
@@ -77,6 +75,24 @@ def format_diagnostic_results(results, model_name):
 
     return f'Top Diseases or Symptoms from {model_name}:\n{formatted_results_str}'
 
+def display_map():
+    st.title("Location")
+    st.write("Please select your location on the map.")
+
+    # Coordinates of your small town in India
+    DEFAULT_LOCATION = (16.941579, 74.419340)
+
+    # Create a Folium map object centered around the default location
+    m = folium.Map(location=DEFAULT_LOCATION, zoom_start=12)
+
+    # Add a marker for the default location
+    folium.Marker(DEFAULT_LOCATION, popup="Your location").add_to(m)
+
+    # Convert Folium map to HTML
+    folium_map = m._repr_html_()
+
+    # Display the map in Streamlit
+    st.write(folium_map, unsafe_allow_html=True)
 
 def generate_answer(audio_recording):
     st.spinner("Consultation in progress...")
@@ -107,7 +123,6 @@ def generate_answer(audio_recording):
     st.session_state.history.append({"message": diagnostic, "is_user": False})
 
     st.success("Medical consultation done")
-
 
 if __name__ == "__main__":
     # Remove the hamburger in the upper right-hand corner and the Made with Streamlit footer
@@ -142,3 +157,6 @@ if __name__ == "__main__":
         generate_answer(audio)
     for i, chat in enumerate(st.session_state.history):  
         st_message(**chat, key=f"message_{i}")  # Utilize a prefix along with index for uniqueness
+
+    # Add the map display function
+    display_map()
