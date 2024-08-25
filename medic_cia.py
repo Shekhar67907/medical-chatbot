@@ -16,7 +16,7 @@ NEW_MODEL_INFO = {"name": "New Model", "api_url": NEW_MODEL_API_URL}
 DIAGNOSTIC_MODELS = [NEW_MODEL_INFO]
 
 # Replace with your actual Hugging Face API token
-headers = {"Authorization": "Bearer YOUR_HUGGING_FACE_API_KEY"}
+headers = {"Authorization": "Bearer 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"}
 
 
 def recognize_speech(audio_file):
