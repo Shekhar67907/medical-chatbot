@@ -1,4 +1,7 @@
-from collections.abc import Iterable  # Updated import for Python 3.10+
+import collections
+if not hasattr(collections, 'Iterable'):
+    import collections.abc
+    collections.Iterable = collections.abc.Iterable
 import requests
 from pydub import AudioSegment
 import streamlit as st
