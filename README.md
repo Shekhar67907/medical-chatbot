@@ -1,1 +1,1 @@
-# medical_diagnostic
+# medical-chatbot
