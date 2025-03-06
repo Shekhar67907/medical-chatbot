@@ -1,8 +1,3 @@
-import collections
-if not hasattr(collections, 'Iterable'):
-    import collections.abc
-    collections.Iterable = collections.abc.Iterable
-import requests
 from pydub import AudioSegment
 import streamlit as st
 from streamlit_chat import message as st_message
